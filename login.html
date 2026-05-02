@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayQu — Login PPOB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#f1f5f9;--fg:#0f172a;--fg2:#334155;--muted:#64748b;--accent:#059669;--accent2:#10b981;--accent-l:#d1fae5;--accent-d:#065f46;--card:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 8px 32px rgba(0,0,0,.1);--glow:rgba(5,150,105,.15);--warn:#f59e0b;--warn-l:#fef3c7;--danger:#ef4444;--danger-l:#fee2e2;--info:#0ea5e9;--info-l:#e0f2fe}
+        .dark{--bg:#0c1222;--fg:#f1f5f9;--fg2:#cbd5e1;--muted:#94a3b8;--card:#1a2744;--border:#243352;--border2:#2d4066;--shadow:0 1px 3px rgba(0,0,0,.3);--shadow-lg:0 8px 32px rgba(0,0,0,.4);--glow:rgba(5,150,105,.08);--warn-l:#451a03;--danger-l:#450a0a;--info-l:#082f49;--accent-l:#052e16}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background .4s,color .4s;overflow:hidden;position:relative}
+        h1,h2,h3,h4,h5{font-family:'Space Grotesk',sans-serif}
+        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+        /* Background */
+        .bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden}
+        .bg-layer::before{content:'';position:absolute;top:-30%;right:-20%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(5,150,105,.12),transparent 70%);animation:floatBlob 20s ease-in-out infinite}
+        .bg-layer::after{content:'';position:absolute;bottom:-20%;left:-15%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.08),transparent 70%);animation:floatBlob 25s ease-in-out infinite reverse}
+        @keyframes floatBlob{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-40px) scale(1.05)}66%{transform:translate(-20px,30px) scale(.95)}}
+        .bg-grid{position:fixed;inset:0;z-index:0;background-image:radial-gradient(var(--border) 1px,transparent 1px);background-size:32px 32px;opacity:.4}
+        .dark .bg-grid{opacity:.15}
+
+        /* Main Container */
+        .login-wrap{position:relative;z-index:1;width:100%;max-width:440px;padding:20px}
+
+        /* Card */
+        .lcard{background:var(--card);border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow-lg);overflow:hidden;animation:cardIn .6s cubic-bezier(.4,0,.2,1)}
+        @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+        .lcard-head{padding:32px 32px 0;text-align:center}
+        .lcard-body{padding:28px 32px 32px}
+
+        /* Logo */
+        .l-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#059669,#34d399);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:800;font-family:'Space Grotesk';box-shadow:0 6px 20px rgba(5,150,105,.3);margin:0 auto 16px;transition:transform .3s}
+        .l-logo:hover{transform:scale(1.05) rotate(-2deg)}
+        .l-title{font-size:24px;font-weight:800;letter-spacing:-.5px}
+        .l-sub{font-size:13px;color:var(--muted);margin-top:4px}
+
+        /* Tabs */
+        .ltabs{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:10px;margin-top:22px}
+        .ltab{flex:1;padding:9px;text-align:center;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);border:none;background:none;font-family:inherit}
+        .ltab.act{background:var(--card);color:var(--fg);box-shadow:var(--shadow)}
+        .ltab:hover:not(.act){color:var(--fg2)}
+
+        /* Tab Content */
+        .tpanel{display:none;animation:fadeIn .3s}.tpanel.act{display:block}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+        /* Form */
+        .fg{margin-bottom:18px}
+        .fl{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--fg)}
+        .fi-group{position:relative}
+        .fi-group>.fi-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;transition:color .2s}
+        .fi{width:100%;padding:11px 42px 11px 40px;border:1px solid var(--border);border-radius:12px;font-size:13.5px;font-family:inherit;background:var(--card);color:var(--fg);transition:all .2s}
+        .fi:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+        .fi:focus~.fi-icon{color:var(--accent)}
+        .fi::placeholder{color:#94a3b8}
+        .fi-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:4px;transition:color .2s}
+        .fi-toggle:hover{color:var(--fg)}
+
+        /* Error */
+        .f-err{font-size:11.5px;color:var(--danger);margin-top:5px;display:none;align-items:center;gap:4px}
+        .f-err.show{display:flex}
+
+        /* Extras */
+        .f-extras{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+        .f-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--fg2)}
+        .f-check input{display:none}
+        .f-check .ck{width:18px;height:18px;border:2px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+        .f-check .ck i{font-size:10px;color:#fff;opacity:0;transform:scale(.5);transition:all .2s}
+        .f-check input:checked+.ck{background:var(--accent);border-color:var(--accent)}
+        .f-check input:checked+.ck i{opacity:1;transform:scale(1)}
+        .f-link{font-size:13px;color:var(--accent);font-weight:600;text-decoration:none;transition:opacity .2s;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+        .f-link:hover{opacity:.75;text-decoration:underline}
+
+        /* Button */
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .25s;width:100%}
+        .btn-p{background:linear-gradient(135deg,#059669,#10b981);color:#fff;box-shadow:0 4px 16px rgba(5,150,105,.3)}
+        .btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(5,150,105,.4)}
+        .btn-p:active{transform:translateY(0)}
+        .btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+        .btn-s{background:var(--bg);color:var(--fg);border:1px solid var(--border)}
+        .btn-s:hover{border-color:var(--accent);color:var(--accent)}
+
+        /* Divider */
+        .divider{display:flex;align-items:center;gap:12px;margin:20px 0}
+        .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+        .divider span{font-size:11.5px;color:var(--muted);font-weight:600;white-space:nowrap}
+
+        /* Social */
+        .socials{display:flex;gap:10px}
+        .soc-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--card);cursor:pointer;transition:all .2s;font-size:13px;font-weight:600;color:var(--fg2);font-family:inherit}
+        .soc-btn:hover{border-color:var(--accent);background:var(--accent-l);color:var(--accent-d)}
+        .soc-btn i{font-size:16px}
+
+        /* Footer */
+        .lcard-foot{text-align:center;padding:0 32px 28px}
+        .lcard-foot p{font-size:13px;color:var(--muted)}
+        .lcard-foot a{color:var(--accent);font-weight:600;text-decoration:none;cursor:pointer}
+        .lcard-foot a:hover{text-decoration:underline}
+
+        /* Bottom bar */
+        .bot-bar{position:relative;z-index:1;text-align:center;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:12px}
+        .bot-bar button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;transition:color .2s;padding:6px}
+        .bot-bar button:hover{color:var(--accent)}
+        .bot-bar .dm-ico{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;background:var(--card);cursor:pointer;color:var(--muted)}
+        .bot-bar .dm-ico:hover{border-color:var(--accent);color:var(--accent)}
+
+        /* Loading state */
+        .btn-loading .btn-text{opacity:0}
+        .btn-loading::after{content:'';position:absolute;width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+        .btn-loading{position:relative;pointer-events:none}
+        @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* Shake */
+        @keyframes shake{0%,100%{transform:translateX(0)}15%,45%,75%{transform:translateX(-8px)}30%,60%,90%{transform:translateX(8px)}}
+        .shake{animation:shake .5s}
+
+        /* Toast */
+        .toast-wrap{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+        .toast{padding:12px 18px;border-radius:12px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;min-width:280px;animation:tIn .35s;pointer-events:auto}
+        .toast.out{animation:tOut .3s forwards}
+        .toast-i{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+        @keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes tOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
+
+        /* Modal */
+        .mo{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+        .mo.show{opacity:1;pointer-events:auto}
+        .ml{background:var(--card);border-radius:20px;width:92%;max-width:400px;transform:scale(.95) translateY(10px);transition:transform .3s;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+        .mo.show .ml{transform:scale(1) translateY(0)}
+        .mlh{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+        .mlh h3{font-size:16px;font-weight:700}
+        .mlc{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);transition:all .2s}
+        .mlc:hover{background:var(--danger-l);color:var(--danger)}
+        .mlb{padding:22px}
+        .mlf{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+        /* Success overlay */
+        .success-ov{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+        .success-ov.show{opacity:1;pointer-events:auto}
+        .success-ov .s-icon{width:80px;height:80px;border-radius:50%;background:var(--accent-l);display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:popIn .5s .2s both}
+        @keyframes popIn{from{transform:scale(0)}60%{transform:scale(1.15)}to{transform:scale(1)}}
+        .success-ov .s-icon i{font-size:36px;color:var(--accent)}
+        .success-ov .s-text{font-family:'Space Grotesk';font-size:22px;font-weight:800;animation:fadeIn .4s .4s both}
+        .success-ov .s-sub{font-size:14px;color:var(--muted);margin-top:6px;animation:fadeIn .4s .5s both}
+
+        @media(max-width:480px){
+            .login-wrap{padding:16px}
+            .lcard-head{padding:24px 24px 0}
+            .lcard-body{padding:20px 24px 24px}
+            .lcard-foot{padding:0 24px 24px}
+            .socials{flex-direction:column}
+        }
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    </style>
+</head>
+<body>
+    <div class="bg-layer"></div>
+    <div class="bg-grid"></div>
+
+    <div class="login-wrap" id="loginWrap">
+        <div class="lcard" id="loginCard">
+            <div class="lcard-head">
+                <div class="l-logo">IMP</div>
+                <h1 class="l-title">IMP SHOP</h1>
+                <p class="l-sub">Platform PPOB Professional</p>
+                <div class="ltabs">
+                    <button class="ltab act" onclick="switchTab('login',this)">Masuk</button>
+                    <button class="ltab" onclick="switchTab('register',this)">Daftar</button>
+                </div>
+            </div>
+
+            <!-- LOGIN PANEL -->
+            <div class="lcard-body">
+                <div class="tpanel act" id="tp-login">
+                    <form onsubmit="handleLogin(event)">
+                        <div class="fg">
+                            <label class="fl">Email / No. HP</label>
+                            <div class="fi-group">
+                                <input class="fi" type="text" id="l-email" placeholder="Masukkan email atau no. HP" autocomplete="email">
+                                <i class="fas fa-envelope fi-icon"></i>
+                            </div>
+                            <div class="f-err" id="l-email-err"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Password</label>
+                            <div class="fi-group">
+                                <input class="fi" type="password" id="l-pass" placeholder="Masukkan password" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" onblur="this.setAttribute('readonly','')">
+                                <i class="fas fa-lock fi-icon"></i>
+                                <button type="button" class="fi-toggle" onclick="togglePw('l-pass',this)" aria-label="Tampilkan password"><i class="fas fa-eye"></i></button>
+                            </div>
+                            <div class="f-err" id="l-pass-err"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div>
+                        </div>
+                        <div class="f-extras">
+                            <label class="f-check">
+                                <input type="checkbox" id="l-remember" checked>
+                                <span class="ck"><i class="fas fa-check"></i></span>
+                                Ingat saya
+                            </label>
+                            <button type="button" class="f-link" onclick="showForgot()">Lupa password?</button>
+                        </div>
+                        <button type="submit" class="btn btn-p" id="l-btn">
+                            <span class="btn-text">Masuk</span>
+                        </button>
+                    </form>
+                    <div class="divider"><span>atau masuk dengan</span></div>
+                    <div class="socials">
+                        <button class="soc-btn" onclick="toast('info','Login via Google — Demo')"><i class="fab fa-google"></i> Google</button>
+                        <button class="soc-btn" onclick="toast('info','Login via WhatsApp — Demo')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    </div>
+                </div>
+
+                <!-- REGISTER PANEL -->
+                <div class="tpanel" id="tp-register">
+                    <form onsubmit="handleRegister(event)">
+                        <div class="fg">
+                            <label class="fl">Nama Lengkap</label>
+                            <div class="fi-group">
+                                <input class="fi" type="text" id="r-name" placeholder="Masukkan nama lengkap">
+                                <i class="fas fa-user fi-icon"></i>
+                            </div>
+                            <div class="f-err" id="r-name-err"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Email</label>
+                            <div class="fi-group">
+                                <input class="fi" type="email" id="r-email" placeholder="Masukkan email">
+                                <i class="fas fa-envelope fi-icon"></i>
+                            </div>
+                            <div class="f-err" id="r-email-err"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">No. HP</label>
+                            <div class="fi-group">
+                                <input class="fi" type="text" id="r-phone" placeholder="08xxxxxxxxxx" maxlength="15">
+                                <i class="fas fa-phone fi-icon"></i>
+                            </div>
+                            <div class="f-err" id="r-phone-err"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Password</label>
+                            <div class="fi-group">
+                                <input class="fi" type="password" id="r-pass" placeholder="Minimal 8 karakter" oninput="chkRegPw()">
+                                <i class="fas fa-lock fi-icon"></i>
+                                <button type="button" class="fi-toggle" onclick="togglePw('r-pass',this)" aria-label="Tampilkan password"><i class="fas fa-eye"></i></button>
+                            </div>
+                            <div style="height:4px;border-radius:2px;background:var(--border);margin-top:6px;overflow:hidden"><div id="r-str-bar" style="height:100%;width:0;border-radius:2px;transition:width .3s,background .3s"></div></div>
+                            <div id="r-str-txt" style="font-size:11px;margin-top:3px;color:var(--muted)"></div>
+                            <div class="f-err" id="r-pass-err"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div>
+                        </div>
+                        <div class="fg" style="margin-bottom:4px">
+                            <label class="fl">Nama Toko <span style="color:var(--muted);font-weight:400">(opsional)</span></label>
+                            <div class="fi-group">
+                                <input class="fi" type="text" id="r-shop" placeholder="Nama toko / usaha Anda">
+                                <i class="fas fa-store fi-icon"></i>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:20px">
+                            <label class="f-check" style="font-size:12.5px">
+                                <input type="checkbox" id="r-agree">
+                                <span class="ck"><i class="fas fa-check"></i></span>
+                                Saya setuju dengan <a style="color:var(--accent);font-weight:600;cursor:pointer" onclick="toast('info','Halaman syarat & ketentuan — Demo')">Syarat & Ketentuan</a>
+                            </label>
+                            <div class="f-err" id="r-agree-err" style="margin-top:5px"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div>
+                        </div>
+                        <button type="submit" class="btn btn-p" id="r-btn">
+                            <span class="btn-text">Daftar Sekarang</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lcard-foot" id="loginFoot">
+                <p>Belum punya akun? <a onclick="switchTab('register',document.querySelectorAll('.ltab')[1])">Daftar gratis</a></p>
+            </div>
+            <div class="lcard-foot" id="regFoot" style="display:none">
+                <p>Sudah punya akun? <a onclick="switchTab('login',document.querySelectorAll('.ltab')[0])">Masuk di sini</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bot-bar">
+        <div class="dm-ico" onclick="tgDM()" title="Dark mode"><i class="fas fa-moon" id="dm-i"></i></div>
+        <span style="font-size:11.5px;color:var(--muted)">&copy; 2026 PayQu &middot; PPOB Platform</span>
+    </div>
+
+    <div class="toast-wrap" id="tw"></div>
+
+    <!-- Modal Lupa Password -->
+    <div class="mo" id="forgotMo">
+        <div class="ml">
+            <div class="mlh"><h3>Lupa Password</h3><button class="mlc" onclick="cForgot()" aria-label="Tutup"><i class="fas fa-xmark"></i></button></div>
+            <div class="mlb">
+                <div style="text-align:center;margin-bottom:18px"><div style="width:52px;height:52px;border-radius:14px;background:var(--info-l);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><i class="fas fa-envelope-open-text" style="font-size:22px;color:var(--info)"></i></div><p style="font-size:13px;color:var(--muted);line-height:1.5">Masukkan email yang terdaftar. Kami akan mengirimkan link reset password.</p></div>
+                <div class="fg" style="margin-bottom:14px"><label class="fl">Email</label><div class="fi-group"><input class="fi" type="email" id="f-email" placeholder="email@contoh.com"><i class="fas fa-envelope fi-icon"></i></div><div class="f-err" id="f-email-err"><i class="fas fa-circle-exclamation" style="font-size:10px"></i><span></span></div></div>
+            </div>
+            <div class="mlf"><button class="btn btn-s" style="width:auto" onclick="cForgot()">Batal</button><button class="btn btn-p" style="width:auto" id="f-btn" onclick="sendReset()"><i class="fas fa-paper-plane"></i> Kirim</button></div>
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-ov" id="succOv">
+        <div class="s-icon"><i class="fas fa-check"></i></div>
+        <div class="s-text">Login Berhasil</div>
+        <div class="s-sub">Mengalihkan ke dashboard...</div>
+    </div>
+
+<script>
+/* ===== CONFIG ===== */
+/* Ganti nama file ini sesuai file dashboard Anda */
+var DASHBOARD_FILE = 'uji.html';
+
+/* Kredensial demo — sesuaikan dengan akun Anda */
+var USERS = [
+    {email:'aditgout@gmail.com', phone:'085678901234', pass:'Adit123!', name:'ADITIA'},
+    {email:'demo@payqu.id', phone:'081234567890', pass:'Demo1234', name:'Demo User'}
+];
+
+/* ===== DARK MODE ===== */
+function tgDM(){
+    document.body.classList.toggle('dark');
+    var dk=document.body.classList.contains('dark');
+    document.getElementById('dm-i').className=dk?'fas fa-sun':'fas fa-moon';
+    localStorage.setItem('pq-dm',dk?'1':'0');
+}
+(function(){if(localStorage.getItem('pq-dm')==='1'){document.body.classList.add('dark');document.getElementById('dm-i').className='fas fa-sun'}})();
+
+/* ===== TOAST ===== */
+function toast(type,msg){
+    var c=document.getElementById('tw'),cls={success:{bg:'#d1fae5',color:'#059669',icon:'fa-check'},error:{bg:'#fee2e2',color:'#ef4444',icon:'fa-xmark'},info:{bg:'#e0f2fe',color:'#0284c7',icon:'fa-info'},warning:{bg:'#fef3c7',color:'#d97706',icon:'fa-triangle-exclamation'}};
+    var cl=cls[type]||cls.info,el=document.createElement('div');el.className='toast';
+    el.innerHTML='<div class="toast-i" style="background:'+cl.bg+';color:'+cl.color+'"><i class="fas '+cl.icon+'"></i></div><span>'+msg+'</span>';
+    c.appendChild(el);setTimeout(function(){el.classList.add('out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},300)},3500);
+}
+
+/* ===== TABS ===== */
+function switchTab(tab,btn){
+    document.querySelectorAll('.ltab').forEach(function(t){t.classList.remove('act')});btn.classList.add('act');
+    document.querySelectorAll('.tpanel').forEach(function(p){p.classList.remove('act')});
+    document.getElementById('tp-'+tab).classList.add('act');
+    document.getElementById('loginFoot').style.display=tab==='login'?'block':'none';
+    document.getElementById('regFoot').style.display=tab==='register'?'block':'none';
+    clearErrs();
+}
+
+/* ===== TOGGLE PASSWORD ===== */
+function togglePw(id,btn){
+    var inp=document.getElementById(id);
+    var show=inp.type==='password';inp.type=show?'text':'password';
+    btn.innerHTML=show?'<i class="fas fa-eye-slash"></i>':'<i class="fas fa-eye"></i>';
+}
+
+/* ===== ERROR HELPERS ===== */
+function showErr(id,msg){var el=document.getElementById(id);el.classList.add('show');el.querySelector('span').textContent=msg;}
+function hideErr(id){document.getElementById(id).classList.remove('show');}
+function clearErrs(){document.querySelectorAll('.f-err').forEach(function(e){e.classList.remove('show')});}
+
+/* ===== LOGIN ===== */
+function handleLogin(e){
+    e.preventDefault();clearErrs();
+    var email=document.getElementById('l-email').value.trim();
+    var pass=document.getElementById('l-pass').value;
+    var valid=true;
+
+    if(!email){showErr('l-email-err','Email atau no. HP wajib diisi');valid=false;}
+    if(!pass){showErr('l-pass-err','Password wajib diisi');valid=false;}
+    if(!valid){document.getElementById('loginCard').classList.add('shake');setTimeout(function(){document.getElementById('loginCard').classList.remove('shake')},500);return;}
+
+    /* Loading */
+    var btn=document.getElementById('l-btn');btn.classList.add('btn-loading');btn.disabled=true;
+
+    setTimeout(function(){
+        /* Cari user */
+        var user=USERS.find(function(u){return(u.email.toLowerCase()===email.toLowerCase())||(u.phone===email);});
+        if(!user||user.pass!==pass){
+            btn.classList.remove('btn-loading');btn.disabled=false;
+            showErr('l-pass-err','Email/no. HP atau password salah');
+            document.getElementById('loginCard').classList.add('shake');setTimeout(function(){document.getElementById('loginCard').classList.remove('shake')},500);
+            return;
+        }
+
+        /* Simpan session lengkap */
+        var userData = {email:user.email, name:user.name, phone:user.phone, shop:user.shop||''};
+        if(document.getElementById('l-remember').checked){
+            localStorage.setItem('pq-user',JSON.stringify(userData));
+        }else{
+            sessionStorage.setItem('pq-user',JSON.stringify(userData));
+        }
+
+        /* Success */
+        btn.classList.remove('btn-loading');btn.disabled=false;
+        document.getElementById('succOv').classList.add('show');
+        setTimeout(function(){window.location.href=DASHBOARD_FILE;},1800);
+    },1500);
+}
+
+/* ===== REGISTER ===== */
+function chkRegPw(){
+    var pw=document.getElementById('r-pass').value,bar=document.getElementById('r-str-bar'),txt=document.getElementById('r-str-txt');
+    if(!pw.length){bar.style.width='0';txt.textContent='';return;}
+    var s=0;if(pw.length>=8)s++;if(pw.length>=12)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+    var pct,col,lbl;
+    if(s<=1){pct=20;col='#ef4444';lbl='Sangat Lemah';}else if(s===2){pct=40;col='#f97316';lbl='Lemah';}else if(s===3){pct=60;col='#f59e0b';lbl='Sedang';}else if(s===4){pct=80;col='#10b981';lbl='Kuat';}else{pct=100;col='#059669';lbl='Sangat Kuat';}
+    bar.style.width=pct+'%';bar.style.background=col;txt.textContent=lbl;txt.style.color=col;
+}
+
+function handleRegister(e){
+    e.preventDefault();clearErrs();
+    var name=document.getElementById('r-name').value.trim();
+    var email=document.getElementById('r-email').value.trim();
+    var phone=document.getElementById('r-phone').value.trim();
+    var pass=document.getElementById('r-pass').value;
+    var agree=document.getElementById('r-agree').checked;
+    var valid=true;
+
+    if(!name){showErr('r-name-err','Nama wajib diisi');valid=false;}
+    if(!email){showErr('r-email-err','Email wajib diisi');valid=false;}
+    else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showErr('r-email-err','Format email tidak valid');valid=false;}
+    if(!phone){showErr('r-phone-err','No. HP wajib diisi');valid=false;}
+    else if(!/^08\d{8,12}$/.test(phone)){showErr('r-phone-err','Format no. HP tidak valid (08xxx)');valid=false;}
+    if(!pass){showErr('r-pass-err','Password wajib diisi');valid=false;}
+    else if(pass.length<8){showErr('r-pass-err','Password minimal 8 karakter');valid=false;}
+    if(!agree){showErr('r-agree-err','Anda harus menyetujui syarat & ketentuan');valid=false;}
+    if(!valid){document.getElementById('loginCard').classList.add('shake');setTimeout(function(){document.getElementById('loginCard').classList.remove('shake')},500);return;}
+
+    /* Cek duplikat */
+    var dup=USERS.find(function(u){return u.email.toLowerCase()===email.toLowerCase()||u.phone===phone;});
+    if(dup){showErr('r-email-err','Email atau no. HP sudah terdaftar');return;}
+
+    var btn=document.getElementById('r-btn');btn.classList.add('btn-loading');btn.disabled=true;
+    setTimeout(function(){
+        USERS.push({email:email,phone:phone,pass:pass,name:name});
+        btn.classList.remove('btn-loading');btn.disabled=false;
+        toast('success','Pendaftaran berhasil! Silakan login.');
+        /* Reset form */
+        document.getElementById('r-name').value='';document.getElementById('r-email').value='';
+        document.getElementById('r-phone').value='';document.getElementById('r-pass').value='';
+        document.getElementById('r-shop').value='';document.getElementById('r-agree').checked=false;
+        document.getElementById('r-str-bar').style.width='0';document.getElementById('r-str-txt').textContent='';
+        /* Pindah ke tab login */
+        switchTab('login',document.querySelectorAll('.ltab')[0]);
+        document.getElementById('l-email').value=email;
+    },1800);
+}
+
+/* ===== LUPA PASSWORD ===== */
+function showForgot(){document.getElementById('forgotMo').classList.add('show');document.getElementById('f-email').value=document.getElementById('l-email').value;document.getElementById('f-email').focus();}
+function cForgot(){document.getElementById('forgotMo').classList.remove('show');hideErr('f-email-err');}
+function sendReset(){
+    var email=document.getElementById('f-email').value.trim();hideErr('f-email-err');
+    if(!email){showErr('f-email-err','Email wajib diisi');return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showErr('f-email-err','Format email tidak valid');return;}
+
+    var btn=document.getElementById('f-btn');btn.classList.add('btn-loading');btn.disabled=true;
+    setTimeout(function(){
+        btn.classList.remove('btn-loading');btn.disabled=false;cForgot();
+        toast('success','Link reset password telah dikirim ke '+email);
+    },1500);
+}
+
+/* ===== AUTO-LOGIN SESSION ===== */
+(function(){
+    var saved=localStorage.getItem('pq-user');
+    if(saved){
+        try{
+            var u=JSON.parse(saved);
+            if(u.email && u.name){
+                /* Ada sesi "Ingat Saya" — auto login */
+                document.getElementById('l-email').value=u.email;
+                document.querySelector('.l-title').textContent='Selamat Datang Kembali, '+u.name;
+                document.querySelector('.l-sub').textContent='Otomatis masuk ke dashboard...';
+                document.getElementById('succOv').classList.add('show');
+                document.querySelector('#succOv .s-text').textContent='Login Otomatis';
+                document.querySelector('#succOv .s-sub').textContent='Mengalihkan ke dashboard...';
+                setTimeout(function(){window.location.href=DASHBOARD_FILE},1800);
+                return;
+            }
+        }catch(e){}
+    }
+    /* Fallback: auto-fill email dari sessionStorage saja (tanpa auto-login) */
+    var sess=sessionStorage.getItem('pq-user');
+    if(sess){try{var s=JSON.parse(sess);if(s.email)document.getElementById('l-email').value=s.email;}catch(e){}}
+})();
+
+/* ===== KEYBOARD ===== */
+document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){cForgot();}
+});
+document.getElementById('forgotMo').addEventListener('click',function(e){if(e.target===this)cForgot();});
+</script>
+</body>
+</html>

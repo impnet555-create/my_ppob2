@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMP.Net — Buat Voucher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#f1f5f9;--fg:#0f172a;--fg2:#334155;--muted:#64748b;--accent:#059669;--accent-l:#d1fae5;--accent-d:#065f46;--card:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 8px 32px rgba(0,0,0,.1);--danger:#ef4444;--danger-l:#fee2e2;--info:#0ea5e9;--info-l:#e0f2fe;--warn:#f59e0b;--warn-l:#fef3c7}
+        .dark{--bg:#0c1222;--fg:#f1f5f9;--fg2:#cbd5e1;--muted:#94a3b8;--card:#1a2744;--border:#243352;--border2:#2d4066;--shadow:0 1px 3px rgba(0,0,0,.3);--shadow-lg:0 8px 32px rgba(0,0,0,.4);--danger-l:#450a0a;--info-l:#082f49;--accent-l:#052e16;--warn-l:#451a03}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;transition:background .4s,color .4s}
+        h1,h2,h3,h4,h5{font-family:'Space Grotesk',sans-serif}
+        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+        .login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .4s,transform .4s}
+        .login-screen.out{opacity:0;pointer-events:none;transform:scale(1.05)}
+        .login-card{text-align:center;width:92%;max-width:380px}
+        .login-logo{width:64px;height:64px;border-radius:18px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 8px 24px rgba(5,150,105,.25)}
+        .login-logo span{font-family:'Space Grotesk';font-size:20px;font-weight:800;color:#fff}
+        .login-title{font-size:24px;font-weight:800;margin-bottom:4px}
+        .login-sub{font-size:13px;color:var(--muted);margin-bottom:32px}
+        .login-pin-wrap{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+        .login-pin{width:48px;height:58px;text-align:center;font-size:26px;font-weight:700;border:2px solid var(--border);border-radius:14px;font-family:'Space Grotesk';background:var(--card);color:var(--fg);transition:all .2s}
+        .login-pin:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+        .login-pin.filled{border-color:var(--accent);background:var(--accent-l)}
+        .login-pin.err{border-color:var(--danger);background:var(--danger-l);animation:shake .4s}
+        .login-err{font-size:12px;color:var(--danger);min-height:20px;margin-bottom:8px}
+        .login-hint{font-size:11px;color:var(--muted);margin-top:20px}
+        .login-btn{display:inline-flex;align-items:center;gap:8px;padding:13px 48px;border-radius:13px;font-size:15px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .25s;background:linear-gradient(135deg,#059669,#10b981);color:#fff;box-shadow:0 4px 20px rgba(5,150,105,.3);margin-bottom:4px}
+        .login-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(5,150,105,.4)}
+        .login-btn:active:not(:disabled){transform:translateY(0)}
+        .login-btn:disabled{opacity:.35;cursor:not-allowed}
+        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+        .dash{display:none;min-height:100vh}
+        .dash.show{display:block;animation:fi .4s both}
+        @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+        .dhead{position:sticky;top:0;z-index:50;background:color-mix(in srgb, var(--bg) 85%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px}
+        .dhead-title{font-size:17px;font-weight:700;flex:1;display:flex;align-items:center;gap:8px}
+        .dhead-title i{color:var(--accent);font-size:15px}
+        .dhead-badge{display:inline-flex;align-items:center;gap:5px;background:var(--accent-l);color:var(--accent-d);padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+        .icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--muted);font-size:14px}
+        .icon-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+        .icon-btn.danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-l)}
+
+        .dcontent{max-width:920px;margin:0 auto;padding:24px}
+
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+        .stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;transition:all .2s}
+        .stat:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+        .stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:10px}
+        .stat-val{font-family:'Space Grotesk';font-size:26px;font-weight:800;line-height:1}
+        .stat-lbl{font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+        .actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .25s;white-space:nowrap}
+        .btn-p{background:linear-gradient(135deg,#059669,#10b981);color:#fff;box-shadow:0 4px 16px rgba(5,150,105,.25)}
+        .btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(5,150,105,.35)}
+        .btn-s{background:var(--card);color:var(--fg);border:1px solid var(--border)}
+        .btn-s:hover{border-color:var(--accent);color:var(--accent)}
+        .btn-d{background:var(--card);color:var(--danger);border:1px solid var(--border)}
+        .btn-d:hover{border-color:var(--danger);background:var(--danger-l)}
+        .btn-export{background:linear-gradient(135deg,#0284c7,#0ea5e9);color:#fff;box-shadow:0 4px 16px rgba(14,165,233,.25)}
+        .btn-export:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(14,165,233,.35)}
+        .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+        .section-label{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .section-label i{font-size:11px}
+        .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+        .vcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:10px;transition:all .25s;animation:fi .3s both}
+        .vcard:hover{box-shadow:var(--shadow-lg)}
+        .vcard-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+        .vcard-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+        .vcard-icon.reg{background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4f46e5}
+        .vcard-icon.gam{background:linear-gradient(135deg,#f5f3ff,#ede9fe);color:#7c3aed}
+        .dark .vcard-icon.reg{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#a5b4fc}
+        .dark .vcard-icon.gam{background:linear-gradient(135deg,#2e1065,#4c1d95);color:#c084fc}
+        .vcard-info{flex:1;min-width:0}
+        .vcard-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+        .vcard-name .tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 7px;border-radius:5px}
+        .vcard-name .tag.t-reg{background:var(--accent-l);color:var(--accent-d)}
+        .vcard-name .tag.t-gam{background:#ede9fe;color:#6d28d9}
+        .dark .vcard-name .tag.t-gam{background:#2e1065;color:#c084fc}
+        .vcard-name .tag.t-phy{background:var(--info-l);color:var(--info)}
+        .vcard-name .tag.t-sub{background:var(--warn-l);color:var(--warn)}
+        .vcard-detail{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+        .vcard-detail span{display:inline-flex;align-items:center;gap:3px}
+        .vcard-detail i{font-size:9px;opacity:.6}
+        .vcard-right{text-align:right;flex-shrink:0}
+        .vcard-price{font-family:'Space Grotesk';font-size:17px;font-weight:800}
+        .vcard-old{font-size:10px;color:var(--muted);text-decoration:line-through}
+        .vcard-code{font-family:'Space Grotesk';font-size:11px;color:var(--muted);letter-spacing:1.5px;margin-top:2px}
+        .vcard-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+        .vcard-btn{padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--fg2);font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+        .vcard-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+        .vcard-btn.del:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-l)}
+
+        .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+        .empty-state i{font-size:44px;opacity:.12;display:block;margin-bottom:12px}
+        .empty-state p{font-size:13px}
+
+        .mo{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+        .mo.show{opacity:1;pointer-events:auto}
+        .ml{background:var(--card);border-radius:20px;width:92%;max-width:520px;max-height:90vh;overflow-y:auto;transform:scale(.95) translateY(10px);transition:transform .3s;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+        .mo.show .ml{transform:scale(1) translateY(0)}
+        .mlh{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+        .mlh h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .mlh h3 i{color:var(--accent);font-size:14px}
+        .mlc{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);transition:all .2s}
+        .mlc:hover{background:var(--danger-l);color:var(--danger)}
+        .mlb{padding:22px}
+        .mlf{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+        .fg{margin-bottom:16px}
+        .fl{display:block;font-size:12px;font-weight:600;color:var(--fg2);margin-bottom:6px}
+        .fl .req{color:var(--danger);margin-left:2px}
+        .fi{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:11px;font-size:14px;font-family:inherit;background:var(--card);color:var(--fg);transition:all .2s;outline:none}
+        .fi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+        .fi.err{border-color:var(--danger);box-shadow:0 0 0 3px rgba(239,68,68,.08)}
+        .fi::placeholder{color:var(--muted);font-size:13px}
+        select.fi{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+        .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .ferr{font-size:11px;color:var(--danger);margin-top:4px;display:none}
+        .ferr.show{display:block}
+        .fcond{display:none}
+        .fcond.show{display:block}
+
+        .pills{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:10px;border:1px solid var(--border)}
+        .pill{flex:1;padding:9px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;border:none;background:none;color:var(--muted);font-family:inherit;transition:all .2s}
+        .pill.act{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.2)}
+        .pill:hover:not(.act){color:var(--fg2)}
+
+        .code-row{display:flex;gap:8px}
+        .code-row .fi{flex:1;font-family:'Space Grotesk';font-weight:600;letter-spacing:2px;font-size:13px}
+        .code-gen{width:42px;height:42px;border-radius:11px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--accent);font-size:14px;flex-shrink:0}
+        .code-gen:hover{background:var(--accent-l);border-color:var(--accent)}
+
+        .export-ov{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+        .export-ov.show{opacity:1;pointer-events:auto}
+        .export-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:popIn .5s .2s both;background:var(--info-l)}
+        @keyframes popIn{from{transform:scale(0)}60%{transform:scale(1.15)}to{transform:scale(1)}}
+        .export-icon i{font-size:36px;color:var(--info)}
+        .export-title{font-family:'Space Grotesk';font-size:22px;font-weight:800;animation:fi .4s .4s both}
+        .export-sub{font-size:14px;color:var(--muted);margin-top:6px;animation:fi .4s .5s both;text-align:center;max-width:320px}
+        .export-detail{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 24px;margin-top:20px;animation:fi .4s .6s both;text-align:left}
+        .export-detail-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+        .export-detail-row span:first-child{color:var(--muted)}
+        .export-detail-row span:last-child{font-weight:700}
+        .export-btns{display:flex;gap:10px;margin-top:24px;animation:fi .4s .7s both}
+
+        .toast-wrap{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+        .toast{padding:12px 18px;border-radius:12px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;min-width:280px;animation:tIn .35s;pointer-events:auto}
+        .toast.out{animation:tOut .3s forwards}
+        .toast-i{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+        @keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes tOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
+
+        @media(max-width:768px){
+            .dcontent{padding:16px}.stats{grid-template-columns:repeat(2,1fr);gap:8px}.stat{padding:12px}.stat-val{font-size:22px}
+            .frow{grid-template-columns:1fr}
+        }
+        @media(max-width:480px){
+            .stats{grid-template-columns:1fr 1fr;gap:6px}.stat{padding:10px}.stat-val{font-size:20px}.stat-icon{width:32px;height:32px;font-size:13px;margin-bottom:6px}
+            .actions{gap:6px}.btn{padding:10px 16px;font-size:12px}
+            .vcard{padding:12px 14px}.vcard-name{font-size:13px}.vcard-price{font-size:15px}
+            .login-pin{width:42px;height:50px;font-size:22px}
+            .login-btn{padding:12px 40px;font-size:14px}
+        }
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    </style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo"><span>IMP</span></div>
+        <div class="login-title">Admin Panel</div>
+        <div class="login-sub">Masukkan PIN admin untuk melanjutkan</div>
+        <div class="login-pin-wrap" id="loginPinWrap">
+            <input class="login-pin" type="tel" maxlength="1" inputmode="numeric" data-li="0">
+            <input class="login-pin" type="tel" maxlength="1" inputmode="numeric" data-li="1">
+            <input class="login-pin" type="tel" maxlength="1" inputmode="numeric" data-li="2">
+            <input class="login-pin" type="tel" maxlength="1" inputmode="numeric" data-li="3">
+            <input class="login-pin" type="tel" maxlength="1" inputmode="numeric" data-li="4">
+            <input class="login-pin" type="tel" maxlength="1" inputmode="numeric" data-li="5">
+        </div>
+        <div class="login-err" id="loginErr"></div>
+        <button class="login-btn" id="loginBtn" disabled onclick="submitLogin()"><i class="fas fa-right-to-bracket"></i> Masuk</button>
+        <div class="login-hint"><i class="fas fa-shield-halved" style="margin-right:4px"></i> Hanya admin yang bisa mengakses halaman ini</div>
+    </div>
+</div>
+
+<div class="dash" id="dashboard">
+    <header class="dhead">
+        <a href="voucher.html" class="icon-btn" title="Kembali"><i class="fas fa-arrow-left"></i></a>
+        <div class="dhead-title"><i class="fas fa-shield-halved"></i> Buat Voucher</div>
+        <span class="dhead-badge"><i class="fas fa-crown" style="font-size:9px"></i> Admin</span>
+        <button class="icon-btn" onclick="toggleDM()" title="Mode gelap/terang"><i class="fas fa-moon" id="dmIcon"></i></button>
+        <button class="icon-btn danger" onclick="doLogout()" title="Logout"><i class="fas fa-right-from-bracket"></i></button>
+    </header>
+    <div class="dcontent">
+        <div class="stats" id="statsArea"></div>
+        <div class="actions">
+            <button class="btn btn-p" onclick="openCreate()"><i class="fas fa-plus"></i> Buat Voucher Baru</button>
+            <button class="btn btn-export" id="exportBtn" onclick="doExport()" disabled><i class="fas fa-file-export"></i> Export ke voucher.html <span id="exportCount"></span></button>
+            <button class="btn btn-d" id="clearBtn" onclick="confirmClearAll()" style="display:none"><i class="fas fa-trash-can"></i> Hapus Semua</button>
+        </div>
+        <div id="vList"></div>
+    </div>
+</div>
+
+<div class="mo" id="formMo">
+    <div class="ml">
+        <div class="mlh"><h3 id="formTitle"><i class="fas fa-plus-circle"></i> Buat Voucher Baru</h3><button class="mlc" onclick="closeForm()" aria-label="Tutup"><i class="fas fa-xmark"></i></button></div>
+        <div class="mlb">
+            <div class="fg"><label class="fl">Kategori<span class="req">*</span></label><div class="pills" id="catPills"><button class="pill act" data-v="reg" onclick="setPill('catPills',this)">Reguler</button><button class="pill" data-v="gam" onclick="setPill('catPills',this)">Gaming</button></div></div>
+            <div class="fg"><label class="fl">Tipe<span class="req">*</span></label><div class="pills" id="typePills"><button class="pill act" data-v="sub" onclick="setType(this)">Langganan</button><button class="pill" data-v="phy" onclick="setType(this)">Fisik</button></div></div>
+            <div class="frow">
+                <div class="fg"><label class="fl">Kecepatan<span class="req">*</span></label><select class="fi" id="fSpd"><option value="10">10 Mbps</option><option value="25">25 Mbps</option><option value="50">50 Mbps</option><option value="100">100 Mbps</option><option value="200">200 Mbps</option></select></div>
+                <div class="fg" id="durGroup"><label class="fl">Durasi<span class="req">*</span></label><div style="display:flex;gap:8px"><input class="fi" type="number" id="fDur" placeholder="1" min="1" style="width:70px"><select class="fi" id="fDurUnit" style="flex:1"><option value="">Bulan</option><option value="jam">Jam</option></select></div></div>
+            </div>
+            <div class="fcond" id="activeGroup"><label class="fl">Waktu Aktif (Fisik)<span class="req">*</span></label><input class="fi" type="text" id="fActive" placeholder='Contoh: 6 jam, 24 jam'><div class="ferr" id="fActiveErr">Waktu aktif wajib diisi untuk voucher fisik</div></div>
+            <div class="frow">
+                <div class="fg"><label class="fl">Harga (Rp)<span class="req">*</span></label><input class="fi" type="number" id="fPrice" placeholder="15000" min="0"><div class="ferr" id="fPriceErr">Harga wajib diisi</div></div>
+                <div class="fg"><label class="fl">Diskon (%)</label><input class="fi" type="number" id="fDisc" placeholder="0" min="0" max="99" value="0"></div>
+            </div>
+            <div class="fg"><label class="fl">Kode Voucher<span class="req">*</span></label><div class="code-row"><input class="fi" type="text" id="fCode" placeholder="IMP-XXXX-XXXX" maxlength="15"><button class="code-gen" onclick="genCode()" title="Auto generate"><i class="fas fa-rotate"></i></button></div><div class="ferr" id="fCodeErr">Kode voucher wajib diisi</div></div>
+        </div>
+        <div class="mlf"><button class="btn btn-s" onclick="closeForm()">Batal</button><button class="btn btn-p" id="formSaveBtn" onclick="saveVoucher()"><i class="fas fa-check"></i> Simpan</button></div>
+    </div>
+</div>
+
+<div class="mo" id="delMo">
+    <div class="ml" style="max-width:400px">
+        <div class="mlh"><h3><i class="fas fa-triangle-exclamation" style="color:var(--danger)"></i> Hapus Voucher</h3><button class="mlc" onclick="closeDel()" aria-label="Tutup"><i class="fas fa-xmark"></i></button></div>
+        <div class="mlb" style="text-align:center">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--danger-l);display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><i class="fas fa-trash-can" style="font-size:22px;color:var(--danger)"></i></div>
+            <p style="font-size:14px;font-weight:600;margin-bottom:6px">Yakin ingin menghapus voucher ini?</p>
+            <p style="font-size:13px;color:var(--muted)" id="delDetail">-</p>
+        </div>
+        <div class="mlf"><button class="btn btn-s" onclick="closeDel()">Batal</button><button class="btn btn-d" onclick="confirmDel()" style="background:var(--danger);color:#fff;border:none"><i class="fas fa-trash-can"></i> Hapus</button></div>
+    </div>
+</div>
+
+<div class="mo" id="clearMo">
+    <div class="ml" style="max-width:400px">
+        <div class="mlh"><h3><i class="fas fa-triangle-exclamation" style="color:var(--danger)"></i> Hapus Semua</h3><button class="mlc" onclick="closeClear()" aria-label="Tutup"><i class="fas fa-xmark"></i></button></div>
+        <div class="mlb" style="text-align:center">
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--danger-l);display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><i class="fas fa-bomb" style="font-size:22px;color:var(--danger)"></i></div>
+            <p style="font-size:14px;font-weight:600;margin-bottom:6px">Hapus semua voucher yang dibuat?</p>
+            <p style="font-size:13px;color:var(--muted)" id="clearDetail">-</p>
+        </div>
+        <div class="mlf"><button class="btn btn-s" onclick="closeClear()">Batal</button><button class="btn btn-d" onclick="confirmClear()" style="background:var(--danger);color:#fff;border:none"><i class="fas fa-trash-can"></i> Hapus Semua</button></div>
+    </div>
+</div>
+
+<div class="export-ov" id="exportOv">
+    <div class="export-icon"><i class="fas fa-file-export"></i></div>
+    <div class="export-title">Export Berhasil</div>
+    <div class="export-sub" id="exportSub">Voucher berhasil diekspor ke voucher.html</div>
+    <div class="export-detail" id="exportDetail"></div>
+    <div class="export-btns">
+        <button class="btn btn-s" onclick="closeExport()"><i class="fas fa-xmark"></i> Tutup</button>
+        <button class="btn btn-export" onclick="openVoucherPage()"><i class="fas fa-external-link"></i> Buka voucher.html</button>
+    </div>
+</div>
+
+<div class="toast-wrap" id="tw"></div>
+
+<script>
+var ADMIN_PIN = '123456';
+var COMPANY = { name: 'IMP.Net', logoText: 'IMP' };
+var STORAGE_KEY = 'imp-admin-vouchers';
+var EXPORT_KEY  = 'imp-custom-vouchers';
+
+var adminVouchers = [];
+var editingId = null;
+var deletingId = null;
+
+if (localStorage.getItem('pq-dm') === '1') {
+    document.body.classList.add('dark');
+    document.getElementById('dmIcon').className = 'fas fa-sun';
+}
+
+loadVouchers();
+initLogin();
+
+/* ===== Fungsi global: cek PIN lengkap & update tombol ===== */
+function checkPinFull() {
+    var all = document.querySelectorAll('[data-li]');
+    var code = '';
+    for (var k = 0; k < all.length; k++) {
+        code += all[k].value;
+    }
+    var btn = document.getElementById('loginBtn');
+    if (code.length >= 6) {
+        btn.disabled = false;
+    } else {
+        btn.disabled = true;
+    }
+}
+
+/* ===== Fungsi global: ambil nilai PIN saat ini ===== */
+function getLoginPin() {
+    var all = document.querySelectorAll('[data-li]');
+    var code = '';
+    for (var k = 0; k < all.length; k++) {
+        code += all[k].value;
+    }
+    return code;
+}
+
+/* ===== AUTH ===== */
+function initLogin() {
+    if (sessionStorage.getItem('imp-admin') === '1') {
+        showDashboard();
+    } else {
+        showLogin();
+    }
+}
+
+function showLogin() {
+    document.getElementById('loginScreen').classList.remove('out');
+    document.getElementById('dashboard').classList.remove('show');
+
+    /* Reset tombol */
+    document.getElementById('loginBtn').disabled = true;
+    document.getElementById('loginErr').textContent = '';
+
+    var all = document.querySelectorAll('[data-li]');
+    for (var j = 0; j < all.length; j++) {
+        (function(inp, idx) {
+            inp.value = '';
+            inp.classList.remove('filled', 'err');
+
+            inp.oninput = function () {
+                /* Hanya izinkan angka, ambil karakter terakhir saja */
+                var v = this.value.replace(/[^0-9]/g, '');
+                this.value = v.length > 0 ? v[v.length - 1] : '';
+                if (this.value.length === 1) {
+                    this.classList.add('filled');
+                    /* Pindah ke input berikutnya */
+                    var next = document.querySelector('[data-li="' + (idx + 1) + '"]');
+                    if (next) next.focus();
+                } else {
+                    this.classList.remove('filled');
+                }
+                document.getElementById('loginErr').textContent = '';
+                checkPinFull();
+            };
+
+            inp.onkeydown = function (e) {
+                if (e.key === 'Backspace') {
+                    if (this.value === '') {
+                        var prev = document.querySelector('[data-li="' + (idx - 1) + '"]');
+                        if (prev) {
+                            prev.focus();
+                            prev.value = '';
+                            prev.classList.remove('filled');
+                        }
+                    } else {
+                        this.value = '';
+                        this.classList.remove('filled');
+                    }
+                    checkPinFull();
+                }
+                if (e.key === 'Enter') {
+                    if (!document.getElementById('loginBtn').disabled) {
+                        submitLogin();
+                    }
+                }
+            };
+
+            inp.onpaste = function (e) {
+                e.preventDefault();
+                var txt = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+                for (var p = 0; p < 6; p++) {
+                    var target = document.querySelector('[data-li="' + p + '"]');
+                    if (target) {
+                        target.value = txt[p] || '';
+                        if (txt[p]) target.classList.add('filled');
+                        else target.classList.remove('filled');
+                    }
+                }
+                var last = document.querySelector('[data-li="5"]');
+                if (last) last.focus();
+                checkPinFull();
+            };
+
+            inp.onfocus = function () {
+                this.select();
+            };
+
+        })(all[j], j);
+    }
+
+    setTimeout(function () {
+        document.querySelector('[data-li="0"]').focus();
+    }, 200);
+}
+
+function submitLogin() {
+    var code = getLoginPin();
+    if (code.length < 6) return;
+
+    if (code !== ADMIN_PIN) {
+        document.getElementById('loginErr').textContent = 'PIN salah. Coba lagi.';
+        document.getElementById('loginBtn').disabled = true;
+        var all = document.querySelectorAll('[data-li]');
+        for (var j = 0; j < all.length; j++) {
+            all[j].classList.add('err');
+        }
+        setTimeout(function () {
+            for (var j = 0; j < all.length; j++) {
+                all[j].value = '';
+                all[j].classList.remove('err', 'filled');
+            }
+            all[0].focus();
+            checkPinFull();
+        }, 600);
+    } else {
+        sessionStorage.setItem('imp-admin', '1');
+        showDashboard();
+    }
+}
+
+function showDashboard() {
+    document.getElementById('loginScreen').classList.add('out');
+    document.getElementById('dashboard').classList.add('show');
+    renderAll();
+}
+
+function doLogout() {
+    sessionStorage.removeItem('imp-admin');
+    showLogin();
+}
+
+/* ===== DARK MODE ===== */
+function toggleDM() {
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    localStorage.setItem('pq-dm', isDark ? '1' : '0');
+    document.getElementById('dmIcon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+/* ===== DATA ===== */
+function loadVouchers() {
+    try { adminVouchers = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch (e) { adminVouchers = []; }
+}
+function saveVouchers() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(adminVouchers));
+}
+
+/* ===== RENDER ===== */
+function renderAll() { renderStats(); renderList(); updateActions(); }
+
+function renderStats() {
+    var total = adminVouchers.length;
+    var physical = adminVouchers.filter(function(v){ return v.physical; }).length;
+    var subs = total - physical;
+    var gaming = adminVouchers.filter(function(v){ return v.cat === 'gam'; }).length;
+    document.getElementById('statsArea').innerHTML =
+        statCard('fas fa-layer-group','linear-gradient(135deg,#d1fae5,#a7f3d0)','#059669',total,'Total Voucher') +
+        statCard('fas fa-ticket','linear-gradient(135deg,#e0f2fe,#bae6fd)','#0284c7',physical,'Voucher Fisik') +
+        statCard('fas fa-repeat','linear-gradient(135deg,#fef3c7,#fde68a)','#d97706',subs,'Langganan') +
+        statCard('fas fa-gamepad','linear-gradient(135deg,#ede9fe,#ddd6fe)','#7c3aed',gaming,'Gaming');
+}
+function statCard(icon,bg,color,val,lbl) {
+    return '<div class="stat"><div class="stat-icon" style="background:'+bg+';color:'+color+'"><i class="'+icon+'"></i></div><div class="stat-val">'+val+'</div><div class="stat-lbl">'+lbl+'</div></div>';
+}
+
+function renderList() {
+    var el = document.getElementById('vList');
+    if (!adminVouchers.length) {
+        el.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>Belum ada voucher yang dibuat</p></div>';
+        return;
+    }
+    var html = '<div class="section-label"><i class="fas fa-list"></i> Daftar Voucher ('+adminVouchers.length+')</div>';
+    adminVouchers.forEach(function(v,i){ html += voucherCard(v,i); });
+    el.innerHTML = html;
+}
+
+function voucherCard(v,i) {
+    var isGm = v.cat === 'gam';
+    var iconCls = isGm ? 'gam' : 'reg';
+    var iconFa = v.physical ? 'ticket' : (isGm ? 'gamepad' : 'wifi');
+    var catTag = isGm ? '<span class="tag t-gam">Gaming</span>' : '<span class="tag t-reg">Reguler</span>';
+    var typeTag = v.physical ? '<span class="tag t-phy">Fisik</span>' : '<span class="tag t-sub">Langganan</span>';
+    var dur = v.dur + ' ' + (v.durUnit || 'Bulan');
+    if (v.physical && v.active) dur = 'Aktif ' + v.active;
+    var oldHtml = v.discount ? '<div class="vcard-old">'+fR(Math.round(v.price/(1-v.discount/100)))+'</div>' : '';
+    var delay = Math.min(i * 0.04, 0.4);
+    return '<div class="vcard" style="animation-delay:'+delay+'s">'+
+        '<div class="vcard-top">'+
+            '<div class="vcard-icon '+iconCls+'"><i class="fas fa-'+iconFa+'"></i></div>'+
+            '<div class="vcard-info">'+
+                '<div class="vcard-name">'+v.spd+' Mbps '+catTag+typeTag+(v.discount?'<span class="tag" style="background:var(--danger-l);color:var(--danger)">-'+v.discount+'%</span>':'')+'</div>'+
+                '<div class="vcard-detail">'+
+                    '<span><i class="fas fa-gauge-high"></i> '+v.spd+' Mbps</span>'+
+                    '<span><i class="fas fa-infinity"></i> Unlimited</span>'+
+                    '<span><i class="fas fa-calendar"></i> '+dur+'</span>'+
+                    (isGm?'<span><i class="fas fa-crosshairs"></i> Low Ping</span>':'')+
+                '</div>'+
+            '</div>'+
+            '<div class="vcard-right">'+
+                oldHtml+
+                '<div class="vcard-price">'+fR(v.price)+'</div>'+
+                '<div class="vcard-code">'+v.code+'</div>'+
+            '</div>'+
+        '</div>'+
+        '<div class="vcard-actions">'+
+            '<button class="vcard-btn" onclick="openEdit('+v.id+')"><i class="fas fa-pen"></i> Edit</button>'+
+            '<button class="vcard-btn del" onclick="openDel('+v.id+')"><i class="fas fa-trash-can"></i> Hapus</button>'+
+        '</div>'+
+    '</div>';
+}
+
+function updateActions() {
+    var has = adminVouchers.length > 0;
+    document.getElementById('exportBtn').disabled = !has;
+    document.getElementById('clearBtn').style.display = has ? 'inline-flex' : 'none';
+    document.getElementById('exportCount').textContent = has ? '('+adminVouchers.length+')' : '';
+}
+
+/* ===== PILLS ===== */
+function setPill(gid, btn) {
+    document.querySelectorAll('#'+gid+' .pill').forEach(function(p){ p.classList.remove('act'); });
+    btn.classList.add('act');
+}
+function setType(btn) {
+    setPill('typePills', btn);
+    var isPhy = btn.getAttribute('data-v') === 'phy';
+    document.getElementById('activeGroup').classList.toggle('show', isPhy);
+    document.getElementById('durGroup').style.display = isPhy ? 'none' : '';
+}
+
+/* ===== CREATE / EDIT ===== */
+function openCreate() {
+    editingId = null;
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Buat Voucher Baru';
+    document.getElementById('formSaveBtn').innerHTML = '<i class="fas fa-check"></i> Simpan';
+    resetForm(); genCode();
+    document.getElementById('formMo').classList.add('show');
+}
+function openEdit(id) {
+    var v = adminVouchers.find(function(x){ return x.id === id; });
+    if (!v) return;
+    editingId = id;
+    document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> Edit Voucher';
+    document.getElementById('formSaveBtn').innerHTML = '<i class="fas fa-check"></i> Perbarui';
+    resetForm();
+    var catBtn = document.querySelector('#catPills .pill[data-v="'+v.cat+'"]');
+    if (catBtn) setPill('catPills', catBtn);
+    var typeBtn = document.querySelector('#typePills .pill[data-v="'+(v.physical?'phy':'sub')+'"]');
+    if (typeBtn) setType(typeBtn);
+    document.getElementById('fSpd').value = v.spd;
+    document.getElementById('fDur').value = v.dur;
+    document.getElementById('fDurUnit').value = v.durUnit || '';
+    document.getElementById('fActive').value = v.active || '';
+    document.getElementById('fPrice').value = v.price;
+    document.getElementById('fDisc').value = v.discount || 0;
+    document.getElementById('fCode').value = v.code;
+    document.getElementById('formMo').classList.add('show');
+}
+function resetForm() {
+    setPill('catPills', document.querySelector('#catPills .pill[data-v="reg"]'));
+    var subBtn = document.querySelector('#typePills .pill[data-v="sub"]');
+    setPill('typePills', subBtn); setType(subBtn);
+    document.getElementById('fSpd').value = '10';
+    document.getElementById('fDur').value = '';
+    document.getElementById('fDurUnit').value = '';
+    document.getElementById('fActive').value = '';
+    document.getElementById('fPrice').value = '';
+    document.getElementById('fDisc').value = '0';
+    document.getElementById('fCode').value = '';
+    clearFormErrors();
+}
+function clearFormErrors() {
+    document.querySelectorAll('.ferr').forEach(function(e){ e.classList.remove('show'); });
+    document.querySelectorAll('.fi').forEach(function(e){ e.classList.remove('err'); });
+}
+function closeForm() { document.getElementById('formMo').classList.remove('show'); }
+
+function saveVoucher() {
+    clearFormErrors();
+    var cat = document.querySelector('#catPills .pill.act').getAttribute('data-v');
+    var isPhy = document.querySelector('#typePills .pill.act').getAttribute('data-v') === 'phy';
+    var spd = parseInt(document.getElementById('fSpd').value);
+    var durVal = document.getElementById('fDur').value.trim();
+    var durUnit = document.getElementById('fDurUnit').value;
+    var active = document.getElementById('fActive').value.trim();
+    var price = document.getElementById('fPrice').value.trim();
+    var disc = parseInt(document.getElementById('fDisc').value) || 0;
+    var code = document.getElementById('fCode').value.trim().toUpperCase();
+    var valid = true;
+    if (isPhy) {
+        if (!active) { showFieldErr('fActive','fActiveErr'); valid = false; }
+        if (!durVal) durVal = '1';
+    } else {
+        if (!durVal || parseInt(durVal) < 1) { document.getElementById('fDur').classList.add('err'); valid = false; }
+    }
+    if (!price || parseInt(price) < 0) { showFieldErr('fPrice','fPriceErr'); valid = false; }
+    if (!code) { showFieldErr('fCode','fCodeErr'); valid = false; }
+    if (code && adminVouchers.some(function(v){ return v.code === code && v.id !== editingId; })) {
+        document.getElementById('fCode').classList.add('err');
+        var ce = document.getElementById('fCodeErr'); ce.textContent = 'Kode sudah digunakan'; ce.classList.add('show'); valid = false;
+    }
+    if (!valid) return;
+    var data = {
+        id: editingId || Date.now(), cat: cat, spd: spd,
+        dur: isPhy ? parseInt(durVal)||1 : parseInt(durVal),
+        durUnit: isPhy ? 'jam' : (durUnit||''),
+        active: isPhy ? active : undefined,
+        price: parseInt(price), discount: Math.min(Math.max(disc,0),99),
+        code: code, physical: isPhy
+    };
+    Object.keys(data).forEach(function(k){ if(data[k]===undefined) delete data[k]; });
+    if (!data.durUnit) delete data.durUnit;
+    if (editingId) {
+        var idx = adminVouchers.findIndex(function(v){ return v.id === editingId; });
+        if (idx !== -1) adminVouchers[idx] = data;
+        toast('success','Voucher berhasil diperbarui');
+    } else {
+        adminVouchers.push(data);
+        toast('success','Voucher baru berhasil dibuat');
+    }
+    saveVouchers(); closeForm(); renderAll();
+}
+function showFieldErr(iid,eid) { document.getElementById(iid).classList.add('err'); document.getElementById(eid).classList.add('show'); }
+
+function genCode() {
+    var cat = document.querySelector('#catPills .pill.act').getAttribute('data-v');
+    var prefix = cat === 'gam' ? 'IMG' : 'IMP';
+    var r = function(){ return Math.random().toString(36).substring(2,6).toUpperCase(); };
+    document.getElementById('fCode').value = prefix+'-'+r()+'-'+r();
+    document.getElementById('fCode').classList.remove('err');
+    document.getElementById('fCodeErr').classList.remove('show');
+}
+
+/* ===== DELETE ===== */
+function openDel(id) {
+    deletingId = id;
+    var v = adminVouchers.find(function(x){ return x.id === id; });
+    if (!v) return;
+    document.getElementById('delDetail').textContent = v.spd+' Mbps '+(v.physical?'Fisik':'Langganan')+' — '+fR(v.price)+' ('+v.code+')';
+    document.getElementById('delMo').classList.add('show');
+}
+function closeDel() { document.getElementById('delMo').classList.remove('show'); deletingId = null; }
+function confirmDel() {
+    if (deletingId === null) return;
+    adminVouchers = adminVouchers.filter(function(v){ return v.id !== deletingId; });
+    saveVouchers(); closeDel(); renderAll();
+    toast('success','Voucher berhasil dihapus');
+}
+
+/* ===== CLEAR ALL ===== */
+function confirmClearAll() {
+    document.getElementById('clearDetail').textContent = adminVouchers.length+' voucher akan dihapus permanen.';
+    document.getElementById('clearMo').classList.add('show');
+}
+function closeClear() { document.getElementById('clearMo').classList.remove('show'); }
+function confirmClear() {
+    adminVouchers = []; saveVouchers(); closeClear(); renderAll();
+    toast('success','Semua voucher berhasil dihapus');
+}
+
+/* ===== EXPORT ===== */
+function doExport() {
+    if (!adminVouchers.length) return;
+    var exportData = adminVouchers.map(function(v){
+        var obj = {id:v.id,cat:v.cat,spd:v.spd,dur:v.dur,price:v.price,discount:v.discount,code:v.code};
+        if(v.physical) obj.physical=true;
+        if(v.durUnit) obj.durUnit=v.durUnit;
+        if(v.active) obj.active=v.active;
+        return obj;
+    });
+    localStorage.setItem(EXPORT_KEY, JSON.stringify(exportData));
+    var total = exportData.length;
+    var physical = exportData.filter(function(v){return v.physical}).length;
+    var subs = total - physical;
+    var gaming = exportData.filter(function(v){return v.cat==='gam'}).length;
+    var totalPrice = exportData.reduce(function(s,v){return s+v.price},0);
+    document.getElementById('exportSub').textContent = total+' voucher berhasil diekspor ke voucher.html';
+    document.getElementById('exportDetail').innerHTML =
+        '<div class="export-detail-row"><span>Total Voucher</span><span>'+total+'</span></div>'+
+        '<div class="export-detail-row"><span>Voucher Fisik</span><span>'+physical+'</span></div>'+
+        '<div class="export-detail-row"><span>Paket Langganan</span><span>'+subs+'</span></div>'+
+        '<div class="export-detail-row"><span>Paket Gaming</span><span>'+gaming+'</span></div>'+
+        '<div style="border-top:1px dashed var(--border);margin:8px 0"></div>'+
+        '<div class="export-detail-row"><span>Total Nilai</span><span style="color:var(--accent)">'+fR(totalPrice)+'</span></div>';
+    document.getElementById('exportOv').classList.add('show');
+    toast('success','Export berhasil — '+total+' voucher');
+}
+function closeExport() { document.getElementById('exportOv').classList.remove('show'); }
+function openVoucherPage() { window.location.href = 'vocher.html'; }
+
+/* ===== HELPERS ===== */
+function fR(n){ return 'Rp '+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+function toast(type,msg) {
+    var c = document.getElementById('tw');
+    var cls = {
+        success:{bg:'#d1fae5',color:'#059669',icon:'fa-check'},
+        error:{bg:'#fee2e2',color:'#ef4444',icon:'fa-xmark'},
+        info:{bg:'#e0f2fe',color:'#0284c7',icon:'fa-info'},
+        warning:{bg:'#fef3c7',color:'#d97706',icon:'fa-triangle-exclamation'}
+    };
+    var cl = cls[type]||cls.info;
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = '<div class="toast-i" style="background:'+cl.bg+';color:'+cl.color+'"><i class="fas '+cl.icon+'"></i></div><span>'+msg+'</span>';
+    c.appendChild(el);
+    setTimeout(function(){ el.classList.add('out'); setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },300); },3500);
+}
+</script>
+</body>
+</html>

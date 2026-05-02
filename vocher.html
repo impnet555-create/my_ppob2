@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMP.Net — Voucher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg:#f1f5f9;--fg:#0f172a;--fg2:#334155;--muted:#64748b;--accent:#059669;--accent-l:#d1fae5;--accent-d:#065f46;--card:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 8px 32px rgba(0,0,0,.1);--warn:#f59e0b;--danger:#ef4444;--danger-l:#fee2e2;--info:#0ea5e9;--info-l:#e0f2fe}
+        .dark{--bg:#0c1222;--fg:#f1f5f9;--fg2:#cbd5e1;--muted:#94a3b8;--card:#1a2744;--border:#243352;--border2:#2d4066;--shadow:0 1px 3px rgba(0,0,0,.3);--shadow-lg:0 8px 32px rgba(0,0,0,.4);--danger-l:#450a0a;--info-l:#082f49;--accent-l:#052e16}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;transition:background .4s,color .4s}
+        h1,h2,h3,h4,h5{font-family:'Space Grotesk',sans-serif}
+        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+        .vhead{position:sticky;top:0;z-index:50;background:color-mix(in srgb, var(--bg) 85%, transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px}
+        .back-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--fg);font-size:15px;flex-shrink:0}
+        .back-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+        .head-title{font-size:17px;font-weight:700;flex:1}
+        .head-badge{display:inline-flex;align-items:center;gap:5px;background:var(--accent-l);color:var(--accent-d);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600}
+
+        .vcontent{max-width:900px;margin:0 auto;padding:24px}
+
+        .vtabs{display:flex;gap:3px;background:var(--card);padding:3px;border-radius:12px;width:fit-content;margin-bottom:18px;border:1px solid var(--border)}
+        .vtab{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);border:none;background:none;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+        .vtab.act{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(5,150,105,.25)}
+        .vtab:hover:not(.act){color:var(--fg2)}
+        .tab-badge{background:rgba(255,255,255,.25);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;line-height:1.4}
+        .vtab:not(.act) .tab-badge{background:var(--accent-l);color:var(--accent-d)}
+
+        .filter-bar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+        .filter-chip{padding:7px 14px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:all .2s;font-family:inherit}
+        .filter-chip.act{border-color:var(--accent);background:var(--accent-l);color:var(--accent-d)}
+        .filter-chip:hover:not(.act){border-color:var(--accent);color:var(--accent)}
+
+        .section-label{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;margin-top:8px;display:flex;align-items:center;gap:8px}
+        .section-label i{font-size:11px}
+        .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+        .vfis{border-radius:16px;background:var(--card);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .3s}
+        .vfis:hover{box-shadow:0 8px 28px var(--shadow-lg);transform:translateY(-3px)}
+        .vfis.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+        .vfis.purchased-card{border-color:var(--accent);border-width:1.5px;cursor:default}
+        .vfis.purchased-card:hover{transform:translateY(-2px)}
+
+        .vfis-header{padding:14px 20px 0;display:flex;align-items:center;justify-content:space-between}
+        .vfis-brand{display:flex;align-items:center;gap:10px}
+        .vfis-brand-logo{width:34px;height:34px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+        .vfis-brand-logo span{font-family:'Space Grotesk';font-size:11px;font-weight:800;color:#fff;letter-spacing:-.3px}
+        .vfis-brand-logo img{width:100%;height:100%;object-fit:cover;border-radius:9px}
+        .vfis-brand-name{font-family:'Space Grotesk';font-size:15px;font-weight:800;color:var(--fg);letter-spacing:-.3px}
+        .vfis-brand-sub{font-size:9.5px;color:var(--muted);font-weight:500;margin-top:1px}
+        .vfis-header-type{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg)}
+        .vfis-header-type.bought{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+
+        .vfis-top{padding:12px 20px 14px;display:flex;align-items:flex-start;gap:14px}
+        .vfis-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+        .vfis-icon.reg{background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4f46e5}
+        .dark .vfis-icon.reg{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#a5b4fc}
+        .vfis-icon.gam{background:linear-gradient(135deg,#f5f3ff,#ede9fe);color:#7c3aed}
+        .dark .vfis-icon.gam{background:linear-gradient(135deg,#2e1065,#4c1d95);color:#c084fc}
+        .vfis-info{flex:1;min-width:0}
+        .vfis-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .vfis-name .tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:5px;background:var(--accent-l);color:var(--accent-d)}
+        .vfis-name .tag.active-tag{background:var(--info-l);color:var(--info)}
+        .dark .vfis-name .tag.active-tag{background:var(--info-l);color:var(--info)}
+        .vfis-name .tag.bought-tag{background:var(--accent-l);color:var(--accent-d)}
+        .vfis-feats{font-size:11.5px;color:var(--muted);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+        .vfis-feats span{display:inline-flex;align-items:center;gap:3px}
+        .vfis-feats i{font-size:9px;opacity:.6}
+        .vfis-price{font-family:'Space Grotesk';font-size:20px;font-weight:800;color:var(--fg);flex-shrink:0;text-align:right;line-height:1.2}
+        .vfis-price .dur{font-size:10px;color:var(--muted);font-weight:500;display:block;margin-top:2px}
+
+        .vfis-tear{position:relative;height:0;border:none;margin:0}
+        .vfis-tear::before{content:'';position:absolute;top:0;left:20px;right:20px;height:2px;background:repeating-linear-gradient(90deg,transparent,transparent 6px,var(--border2) 6px,var(--border2) 12px)}
+        .vfis-tear::after{content:'';position:absolute;top:-8px;left:-8px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--border);z-index:2}
+
+        .vfis-bot{padding:14px 20px 18px;display:flex;align-items:center;gap:16px;background:color-mix(in srgb, var(--card) 60%, var(--bg))}
+        .vfis-code-area{flex:1}
+        .vfis-code-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px}
+        .vfis-code{font-family:'Space Grotesk';font-size:15px;font-weight:700;letter-spacing:3px;color:var(--fg);background:var(--card);padding:7px 14px;border-radius:9px;border:1px solid var(--border);display:inline-block}
+        .vfis-code.masked{color:var(--muted);letter-spacing:4px;font-size:14px}
+        .vfis-meta{font-size:10px;color:var(--muted);margin-top:5px;display:flex;gap:10px;flex-wrap:wrap}
+        .vfis-meta span{display:inline-flex;align-items:center;gap:3px}
+        .vfis-meta i{font-size:9px;opacity:.6}
+        .vfis-barcode{flex-shrink:0}
+        .vfis-barcode canvas{border-radius:6px;display:block}
+        .vfis-copy{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--muted);font-size:12px;flex-shrink:0}
+        .vfis-copy:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+        .vfis-copy.locked{cursor:default;opacity:.35}
+        .vfis-copy.locked:hover{border-color:var(--border);color:var(--muted);background:var(--card)}
+
+        .vc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .25s;position:relative}
+        .vc:hover{border-color:var(--accent);box-shadow:0 4px 16px var(--shadow-lg)}
+        .vc.sel{border-color:var(--accent);background:var(--accent-l);box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+        .vc-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+        .vc-icon.reg{background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4f46e5}
+        .vc-icon.gam{background:linear-gradient(135deg,#f5f3ff,#ede9fe);color:#7c3aed}
+        .dark .vc-icon.reg{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#a5b4fc}
+        .dark .vc-icon.gam{background:linear-gradient(135deg,#2e1065,#4c1d95);color:#c084fc}
+        .vc-body{flex:1;min-width:0}
+        .vc-name{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .vc-name .tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:5px;background:var(--accent-l);color:var(--accent-d)}
+        .vc-name .tag.gam-tag{background:#ede9fe;color:#6d28d9}
+        .dark .vc-name .tag.gam-tag{background:#2e1065;color:#c084fc}
+        .vc-detail{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap}
+        .vc-detail span{display:inline-flex;align-items:center;gap:4px}
+        .vc-detail i{font-size:10px;opacity:.6}
+        .vc-right{text-align:right;flex-shrink:0}
+        .vc-price{font-family:'Space Grotesk';font-size:18px;font-weight:800;color:var(--fg)}
+        .vc-old{font-size:11px;color:var(--muted);text-decoration:line-through}
+        .vc-dur{font-size:11px;color:var(--muted);margin-top:2px}
+        .vc-disc{position:absolute;top:-1px;right:16px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:0 0 8px 8px;letter-spacing:.5px}
+
+        .purchase-panel{position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--card);border-top:1px solid var(--border);box-shadow:0 -4px 24px rgba(0,0,0,.08);padding:16px 24px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:16px}
+        .purchase-panel.show{transform:translateY(0)}
+        .pp-info{flex:1;min-width:200px}
+        .pp-name{font-size:14px;font-weight:700}.pp-desc{font-size:12px;color:var(--muted);margin-top:2px}
+        .pp-price{font-family:'Space Grotesk';font-size:24px;font-weight:800;color:var(--accent)}
+        .pp-price .pp-old{font-size:12px;color:var(--muted);text-decoration:line-through;font-weight:400;display:block}
+
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .25s;white-space:nowrap}
+        .btn-p{background:linear-gradient(135deg,#059669,#10b981);color:#fff;box-shadow:0 4px 16px rgba(5,150,105,.25)}
+        .btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(5,150,105,.35)}
+        .btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+        .btn-s{background:var(--bg);color:var(--fg);border:1px solid var(--border)}
+        .btn-s:hover{border-color:var(--accent);color:var(--accent)}
+        .btn-icon{width:40px;height:40px;padding:0;justify-content:center;border-radius:11px}
+
+        .mo{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+        .mo.show{opacity:1;pointer-events:auto}
+        .ml{background:var(--card);border-radius:20px;width:92%;max-width:460px;max-height:88vh;overflow-y:auto;transform:scale(.95) translateY(10px);transition:transform .3s;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+        .mo.show .ml{transform:scale(1) translateY(0)}
+        .mlh{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+        .mlh h3{font-size:16px;font-weight:700}
+        .mlc{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);transition:all .2s}
+        .mlc:hover{background:var(--danger-l);color:var(--danger)}
+        .mlb{padding:22px}
+        .mlf{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+        .pm-opt{display:flex;align-items:center;gap:10px;padding:12px 14px;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;background:var(--card)}
+        .pm-opt:hover{border-color:var(--accent)}
+        .pm-opt.pm-sel{border-color:var(--accent);background:var(--accent-l);box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+        .pm-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+        .pm-name{font-size:13px;font-weight:600;color:var(--fg2)}
+        .pm-sel .pm-name{color:var(--accent-d);font-weight:700}
+
+        .pay-num-wrap{max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease,margin .3s ease;margin-top:0}
+        .pay-num-wrap.show{max-height:120px;opacity:1;margin-top:14px}
+        .pay-num-label{font-size:12px;font-weight:600;color:var(--fg2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+        .pay-num-label i{font-size:11px;color:var(--accent)}
+        .pay-num-input{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-size:15px;font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:1.5px;background:var(--card);color:var(--fg);transition:all .2s;outline:none}
+        .pay-num-input::placeholder{color:var(--muted);font-weight:400;letter-spacing:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px}
+        .pay-num-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+        .pay-num-input.err{border-color:var(--danger);box-shadow:0 0 0 3px rgba(239,68,68,.1);animation:shake .4s}
+        .pay-num-input.valid{border-color:var(--accent);background:var(--accent-l)}
+        .pay-num-hint{font-size:11px;color:var(--muted);margin-top:5px;min-height:16px}
+        .pay-num-hint.err-text{color:var(--danger)}
+        .pay-num-summary{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border-radius:10px;margin-top:8px;font-size:12px;color:var(--fg2)}
+        .pay-num-summary i{color:var(--accent);font-size:13px}
+        .pay-num-summary strong{color:var(--fg);font-weight:700}
+
+        .pin-wrap{display:flex;gap:10px;justify-content:center}
+        .pin-in{width:46px;height:54px;text-align:center;font-size:24px;font-weight:700;border:2px solid var(--border);border-radius:12px;font-family:'Space Grotesk';background:var(--card);color:var(--fg);transition:all .2s}
+        .pin-in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(5,150,105,.12)}
+        .pin-in.filled{border-color:var(--accent);background:var(--accent-l)}
+        .pin-in.err{border-color:var(--danger);background:var(--danger-l);animation:shake .4s}
+        @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+        .toast-wrap{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+        .toast{padding:12px 18px;border-radius:12px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;min-width:280px;animation:tIn .35s;pointer-events:auto}
+        .toast.out{animation:tOut .3s forwards}
+        .toast-i{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+        @keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes tOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
+        @keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+        .succ-ov{position:fixed;inset:0;z-index:300;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+        .succ-ov.show{opacity:1;pointer-events:auto}
+        .succ-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:popIn .5s .2s both;background:var(--accent-l)}
+        @keyframes popIn{from{transform:scale(0)}60%{transform:scale(1.15)}to{transform:scale(1)}}
+        .succ-icon i{font-size:36px;color:var(--accent)}
+        .succ-title{font-family:'Space Grotesk';font-size:22px;font-weight:800;animation:fi .4s .4s both}
+        .succ-sub{font-size:14px;color:var(--muted);margin-top:6px;animation:fi .4s .5s both;max-width:90%;text-align:center}
+        .succ-code{font-family:'Space Grotesk';font-size:17px;font-weight:700;letter-spacing:3px;color:var(--accent);margin-top:16px;padding:10px 20px;border-radius:12px;background:var(--accent-l);animation:fi .4s .6s both;cursor:pointer;transition:background .2s}
+        .succ-code:hover{background:color-mix(in srgb, var(--accent-l) 80%, var(--accent))}
+        .succ-btns{display:flex;gap:10px;margin-top:24px;animation:fi .4s .7s both}
+
+        .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+        .empty-state i{font-size:40px;opacity:.15;display:block;margin-bottom:12px}
+        .empty-state p{font-size:13px}
+
+        @media(max-width:768px){
+            .vcontent{padding:16px}.vc{padding:14px 16px;gap:12px}.vc-icon{width:42px;height:42px;font-size:16px}.vc-price{font-size:16px}.purchase-panel{padding:14px 16px}
+            .vfis-header{padding:12px 16px 0}.vfis-top{padding:10px 16px 12px;gap:10px}.vfis-bot{padding:12px 16px 14px;gap:10px;flex-wrap:wrap}.vfis-price{font-size:17px}
+        }
+        @media(max-width:480px){
+            .vc-body{min-width:0}.vc-name{font-size:13px}.vc-detail{font-size:11px;gap:8px}.vc-right{min-width:auto}
+            .filter-bar{gap:6px}.filter-chip{padding:6px 10px;font-size:11px}
+            .vfis-code{font-size:13px;letter-spacing:2px;padding:6px 10px}.vfis-barcode canvas{width:140px!important}.vfis-name{font-size:13px}
+            .vfis-brand-name{font-size:13px}.vfis-brand-sub{font-size:8.5px}.vfis-header-type{font-size:8px;padding:2px 8px}.vfis-brand-logo{width:30px;height:30px}
+        }
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    </style>
+</head>
+<body>
+
+    <header class="vhead">
+        <button class="back-btn" onclick="goBack()" aria-label="Kembali"><i class="fas fa-arrow-left"></i></button>
+        <span class="head-title">Voucher IMP.Net</span>
+        <span class="head-badge"><i class="fas fa-wifi" style="font-size:10px"></i> Aktif</span>
+    </header>
+
+    <div class="vcontent">
+        <div class="vtabs" id="vTabs">
+            <button class="vtab act" onclick="filterCat('all',this)">Semua</button>
+            <button class="vtab" onclick="filterCat('reg',this)">Reguler</button>
+            <button class="vtab" onclick="filterCat('gam',this)">Gaming</button>
+            <button class="vtab" onclick="filterCat('purchased',this)" id="tabPurchased"><i class="fas fa-check-circle" style="font-size:11px"></i> Dibeli <span class="tab-badge" id="purchasedBadge" style="display:none">0</span></button>
+        </div>
+
+        <div class="filter-bar" id="speedFilter">
+            <span style="font-size:12px;color:var(--muted);font-weight:600">Kecepatan:</span>
+            <button class="filter-chip act" onclick="filterSpd('all',this)">Semua</button>
+            <button class="filter-chip" onclick="filterSpd('10',this)">10 Mbps</button>
+            <button class="filter-chip" onclick="filterSpd('25',this)">25 Mbps</button>
+            <button class="filter-chip" onclick="filterSpd('50',this)">50 Mbps</button>
+            <button class="filter-chip" onclick="filterSpd('100',this)">100 Mbps</button>
+            <button class="filter-chip" onclick="filterSpd('200',this)">200 Mbps</button>
+        </div>
+
+        <div id="vList"></div>
+    </div>
+
+    <div class="purchase-panel" id="ppanel">
+        <button class="btn btn-icon btn-s" onclick="deselectVc()"><i class="fas fa-xmark"></i></button>
+        <div class="pp-info"><div class="pp-name" id="ppName">-</div><div class="pp-desc" id="ppDesc">-</div></div>
+        <div class="pp-price"><span class="pp-old" id="ppOld" style="display:none"></span><span id="ppPrice">-</span></div>
+        <button class="btn btn-p" onclick="showBuyModal()"><i class="fas fa-shopping-cart"></i> Beli</button>
+    </div>
+
+    <div class="mo" id="buyMo">
+        <div class="ml">
+            <div class="mlh"><h3>Konfirmasi Pembelian</h3><button class="mlc" onclick="cBuy()" aria-label="Tutup"><i class="fas fa-xmark"></i></button></div>
+            <div class="mlb" id="buyBody"></div>
+            <div class="mlf" id="buyFoot"></div>
+        </div>
+    </div>
+
+    <div class="mo" id="pinMo">
+        <div class="ml">
+            <div class="mlh"><h3>Masukkan PIN</h3><button class="mlc" onclick="cPin()" aria-label="Tutup"><i class="fas fa-xmark"></i></button></div>
+            <div class="mlb" style="text-align:center">
+                <div style="width:52px;height:52px;border-radius:14px;background:var(--info-l);display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><i class="fas fa-lock" style="font-size:20px;color:var(--info)"></i></div>
+                <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Masukkan 6 digit PIN untuk melanjutkan</p>
+                <div class="pin-wrap" id="pinWrap">
+                    <input class="pin-in" type="password" maxlength="1" inputmode="numeric" data-pi="0">
+                    <input class="pin-in" type="password" maxlength="1" inputmode="numeric" data-pi="1">
+                    <input class="pin-in" type="password" maxlength="1" inputmode="numeric" data-pi="2">
+                    <input class="pin-in" type="password" maxlength="1" inputmode="numeric" data-pi="3">
+                    <input class="pin-in" type="password" maxlength="1" inputmode="numeric" data-pi="4">
+                    <input class="pin-in" type="password" maxlength="1" inputmode="numeric" data-pi="5">
+                </div>
+                <div id="pinErr" style="font-size:11px;color:var(--danger);margin-top:8px;display:none"></div>
+            </div>
+            <div class="mlf"><button class="btn btn-s" onclick="cPin()">Batal</button></div>
+        </div>
+    </div>
+
+    <div class="succ-ov" id="succOv">
+        <div class="succ-icon"><i class="fas fa-check"></i></div>
+        <div class="succ-title">Pembelian Berhasil</div>
+        <div class="succ-sub" id="succSub">Voucher telah aktif</div>
+        <div class="succ-code" id="succCode" onclick="cpCode()" title="Klik untuk salin">IMP-XXXX-XXXX</div>
+        <div class="succ-btns">
+            <button class="btn btn-s" onclick="backToVouchers()"><i class="fas fa-arrow-left"></i> Kembali</button>
+            <button class="btn btn-p" onclick="backToDashboard()"><i class="fas fa-th-large"></i> Dashboard</button>
+        </div>
+    </div>
+
+    <div class="toast-wrap" id="tw"></div>
+
+<script>
+var COMPANY = {
+    name: 'IMP.Net',
+    sub: 'Internet Provider',
+    logoText: 'IMP',
+    logoUrl: ''
+};
+
+var VOUCHERS=[
+    {id:100,cat:'reg',spd:10,dur:6,durUnit:'jam',active:'6 jam',price:2000,discount:0,code:'IMP-G4P2-JM7K',physical:true},
+    {id:101,cat:'reg',spd:10,dur:12,durUnit:'jam',active:'24 jam',price:4000,discount:0,code:'IMP-H8N5-QW3R',physical:true},
+    {id:102,cat:'reg',spd:10,dur:24,durUnit:'jam',active:'24 jam',price:10000,discount:10,code:'IMP-PCXK-GH8H',physical:true},
+    {id:1,cat:'reg',spd:10,dur:1,price:15000,discount:0,code:'IMP-A2K7-PN3M'},
+    {id:2,cat:'reg',spd:10,dur:3,price:40000,discount:11,code:'IMP-B5N8-QW4J'},
+    {id:3,cat:'reg',spd:10,dur:7,price:80000,discount:19,code:'IMP-C9R2-HK6T'},
+    {id:4,cat:'reg',spd:25,dur:1,price:185000,discount:0,code:'IMP-4K7M-XN2P'},
+    {id:5,cat:'reg',spd:25,dur:2,price:350000,discount:5,code:'IMP-8J3R-QW9F'},
+    {id:6,cat:'reg',spd:50,dur:1,price:275000,discount:0,code:'IMP-2N5K-LM6V'},
+    {id:7,cat:'reg',spd:50,dur:2,price:520000,discount:5,code:'IMP-7H9T-YB3W'},
+    {id:8,cat:'reg',spd:100,dur:1,price:450000,discount:0,code:'IMP-5P2X-CF8J'},
+    {id:9,cat:'reg',spd:100,dur:2,price:850000,discount:6,code:'IMP-1M6G-RD4N'},
+    {id:10,cat:'reg',spd:200,dur:1,price:650000,discount:0,code:'IMP-9T4B-HK7S'},
+    {id:11,cat:'reg',spd:200,dur:2,price:1200000,discount:8,code:'IMP-3W8Y-JQ5X'},
+    {id:12,cat:'gam',spd:10,dur:1,price:18000,discount:0,code:'IMG-D3M6-CF9R'},
+    {id:13,cat:'gam',spd:10,dur:3,price:50000,discount:8,code:'IMG-E7T1-YB2W'},
+    {id:14,cat:'gam',spd:10,dur:7,price:115000,discount:14,code:'IMG-F1X5-RD8N'},
+    {id:15,cat:'gam',spd:25,dur:1,price:225000,discount:0,code:'IMG-6R2N-PK4M'},
+    {id:16,cat:'gam',spd:50,dur:1,price:325000,discount:0,code:'IMG-4K8H-TW7J'},
+    {id:17,cat:'gam',spd:100,dur:1,price:500000,discount:0,code:'IMG-2N5F-CB9R'},
+    {id:18,cat:'gam',spd:200,dur:1,price:750000,discount:0,code:'IMG-8Q3X-LM6Y'}
+];
+
+var PIN='123456';
+var selVc=null;
+var selPay=null;
+var payNumVal='';
+var curCat='all';
+var curSpd='all';
+
+/* ===== TAMBAHAN: Daftar voucher yang sudah dibeli ===== */
+var purchased=[];
+
+var PAYMENTS=[
+    {id:'dana',name:'DANA',icon:'fas fa-wallet',color:'#108ee9',bg:'#e6f7ff',inputLabel:'Nomor DANA',placeholder:'08xxxxxxxxxx',minLen:10,maxLen:13},
+    {id:'ovo',name:'OVO',icon:'fas fa-wallet',color:'#4c3494',bg:'#f0e6ff',inputLabel:'Nomor OVO',placeholder:'08xxxxxxxxxx',minLen:10,maxLen:13},
+    {id:'gopay',name:'GoPay',icon:'fas fa-wallet',color:'#00aed6',bg:'#e6faf5',inputLabel:'Nomor GoPay',placeholder:'08xxxxxxxxxx',minLen:10,maxLen:13},
+    {id:'shopeepay',name:'ShopeePay',icon:'fas fa-wallet',color:'#ee4d2d',bg:'#fff0ee',inputLabel:'Nomor ShopeePay',placeholder:'08xxxxxxxxxx',minLen:10,maxLen:13},
+    {id:'linkaja',name:'LinkAja',icon:'fas fa-wallet',color:'#e52b1c',bg:'#fce8e6',inputLabel:'Nomor LinkAja',placeholder:'08xxxxxxxxxx',minLen:10,maxLen:13},
+    {id:'qris',name:'QRIS',icon:'fas fa-qrcode',color:'#059669',bg:'#d1fae5',inputLabel:'Nomor HP (QRIS)',placeholder:'08xxxxxxxxxx',minLen:10,maxLen:13},
+    {id:'bca',name:'BCA VA',icon:'fas fa-building-columns',color:'#003d79',bg:'#e0edff',inputLabel:'Nomor Rekening BCA',placeholder:'Masukkan nomor rekening',minLen:8,maxLen:16},
+    {id:'bri',name:'BRI VA',icon:'fas fa-building-columns',color:'#00529c',bg:'#e0f0ff',inputLabel:'Nomor Rekening BRI',placeholder:'Masukkan nomor rekening',minLen:8,maxLen:16}
+];
+
+if(localStorage.getItem('pq-dm')==='1')document.body.classList.add('dark');
+
+function fR(n){return 'Rp '+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
+function getDurLabel(v){return v.dur+' '+(v.durUnit||'Bulan')}
+
+/* ===== TAMBAHAN: Helper untuk voucher yang sudah dibeli ===== */
+function isVoucherPurchased(vid){
+    return purchased.some(function(p){return p.voucher.id===vid});
+}
+function getPurchasedCode(vid){
+    for(var i=purchased.length-1;i>=0;i--){
+        if(purchased[i].voucher.id===vid)return purchased[i].code;
+    }
+    return '****-****-****';
+}
+function updatePurchasedBadge(){
+    var b=document.getElementById('purchasedBadge');
+    if(purchased.length>0){b.style.display='inline';b.textContent=purchased.length;}
+    else{b.style.display='none';}
+}
+/* ===== AKHIR TAMBAHAN ===== */
+
+function getFiltered(){
+    return VOUCHERS.filter(function(v){
+        if(curCat!=='all'&&curCat!=='purchased'&&v.cat!==curCat)return false;
+        if(curSpd!=='all'&&v.spd!==parseInt(curSpd))return false;
+        return true;
+    });
+}
+
+function drawBarcode(canvasId,text){
+    var c=document.getElementById(canvasId);if(!c)return;
+    var ctx=c.getContext('2d'),w=c.width,h=c.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--card').trim()||'#fff';
+    ctx.fillRect(0,0,w,h);
+    var seed=0;for(var si=0;si<text.length;si++)seed=((seed<<5)-seed)+text.charCodeAt(si);
+    function pr(){seed=(seed*16807)%2147483647;return(seed&1)}
+    var px=6,py=8,bw=w-px*2,bars=60,barW=bw/bars,x=px;
+    for(var i=0;i<bars;i++){
+        if(i%2===0){ctx.fillStyle='#000';ctx.fillRect(x,py,barW,h-py*2)}
+        else{if(pr()){ctx.fillRect(x,py+2,barW,h-py*4);ctx.fillRect(x,py,barW,4)}}
+        x+=barW;
+    }
+    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--card').trim()||'#fff';
+    ctx.fillRect(0,0,px,h);ctx.fillRect(w-px,0,px,h);
+    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--muted').trim()||'#64748b';
+    ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText(text,w/2,h-py+1);
+}
+
+function logoHTML(){
+    if(COMPANY.logoUrl&&COMPANY.logoUrl.trim()!==''){
+        return '<img src="'+COMPANY.logoUrl+'" alt="'+COMPANY.name+'" onerror="this.parentElement.innerHTML=\'<span>'+COMPANY.logoText+'</span>\'">';
+    }
+    return '<span>'+COMPANY.logoText+'</span>';
+}
+
+function companyHeaderHTML(typeLabel,typeClass){
+    return '<div class="vfis-header">'+
+        '<div class="vfis-brand">'+
+            '<div class="vfis-brand-logo">'+logoHTML()+'</div>'+
+            '<div>'+
+                '<div class="vfis-brand-name">'+COMPANY.name+'</div>'+
+                '<div class="vfis-brand-sub">'+COMPANY.sub+'</div>'+
+            '</div>'+
+        '</div>'+
+        '<div class="vfis-header-type '+(typeClass||'')+'">'+typeLabel+'</div>'+
+    '</div>';
+}
+
+function renderPhysical(v,i){
+    var selCls=selVc&&selVc.id===v.id?' sel':'';
+    var activeTag=v.active?'<span class="tag active-tag"><i class="fas fa-clock" style="font-size:8px;margin-right:2px"></i> Aktif '+v.active+'</span>':'';
+
+    /* ===== TAMBAHAN: Sembunyikan kode jika belum dibeli ===== */
+    var isBought=isVoucherPurchased(v.id);
+    var realCode=isBought?getPurchasedCode(v.id):'';
+    var displayCode=isBought?realCode:'****-****-****';
+    var codeCls=isBought?'vfis-code':'vfis-code masked';
+    var barcodeHtml=isBought?'<div class="vfis-barcode"><canvas id="bc-'+v.id+'" width="180" height="46"></canvas></div>':'<div style="flex:1"></div>';
+    var copyHtml=isBought?'<button class="vfis-copy" onclick="event.stopPropagation();cpText(\''+realCode+'\')" title="Salin kode"><i class="fas fa-copy"></i></button>':'<div class="vfis-copy locked" title="Beli untuk melihat kode"><i class="fas fa-lock"></i></div>';
+    var boughtTag=isBought?'<span class="tag bought-tag"><i class="fas fa-check" style="font-size:8px;margin-right:2px"></i> Dibeli</span>':'';
+    /* ===== AKHIR TAMBAHAN ===== */
+
+    return '<div class="vfis'+selCls+'" onclick="selectVc('+v.id+')" data-vid="'+v.id+'" style="animation:fi .35s '+(i*0.06)+'s both">'+
+        companyHeaderHTML('Voucher Fisik','')+
+        '<div class="vfis-top">'+
+            '<div class="vfis-icon reg"><i class="fas fa-ticket"></i></div>'+
+            '<div class="vfis-info">'+
+                '<div class="vfis-name">'+v.spd+' Mbps <span class="tag">Fisik</span>'+activeTag+boughtTag+'</div>'+
+                '<div class="vfis-feats">'+
+                    '<span><i class="fas fa-gauge-high"></i> '+v.spd+' Mbps</span>'+
+                    '<span><i class="fas fa-infinity"></i> Unlimited</span>'+
+                '</div>'+
+            '</div>'+
+            '<div class="vfis-price">'+fR(v.price)+'<span class="dur">'+getDurLabel(v)+' pakai</span></div>'+
+        '</div>'+
+        '<hr class="vfis-tear">'+
+        '<div class="vfis-bot">'+
+            '<div class="vfis-code-area">'+
+                '<div class="vfis-code-lbl">Kode Aktifasi</div>'+
+                '<div class="'+codeCls+'">'+displayCode+'</div>'+
+            '</div>'+
+            barcodeHtml+
+            copyHtml+
+        '</div>'+
+    '</div>';
+}
+
+function renderNormal(v,i){
+    var isGm=v.cat==='gam';
+    var selCls=selVc&&selVc.id===v.id?' sel':'';
+    var discHtml=v.discount?'<div class="vc-disc">-'+v.discount+'%</div>':'';
+    var oldHtml=v.discount?'<div class="vc-old">'+fR(Math.round(v.price/(1-v.discount/100)))+'</div>':'';
+    var tagCls=isGm?'tag gam-tag':'tag';
+    var tagText=isGm?'Gaming':'Reguler';
+    var extra=isGm?'<span><i class="fas fa-crosshairs"></i> Low Ping</span>':'';
+    return '<div class="vc'+selCls+'" onclick="selectVc('+v.id+')" data-vid="'+v.id+'" style="animation:fi .35s '+(i*0.04)+'s both">'+
+        discHtml+
+        '<div class="vc-icon '+(isGm?'gam':'reg')+'"><i class="fas fa-'+(isGm?'gamepad':'wifi')+'"></i></div>'+
+        '<div class="vc-body">'+
+            '<div class="vc-name">'+v.spd+' Mbps <span class="'+tagCls+'">'+tagText+'</span></div>'+
+            '<div class="vc-detail">'+
+                '<span><i class="fas fa-gauge-high"></i> '+v.spd+' Mbps</span>'+
+                '<span><i class="fas fa-infinity"></i> Unlimited</span>'+
+                '<span><i class="fas fa-calendar"></i> '+getDurLabel(v)+'</span>'+
+                extra+
+            '</div>'+
+        '</div>'+
+        '<div class="vc-right">'+
+            oldHtml+
+            '<div class="vc-price">'+fR(v.price)+'</div>'+
+            '<div class="vc-dur">'+getDurLabel(v)+'</div>'+
+        '</div>'+
+    '</div>';
+}
+
+/* ===== TAMBAHAN: Render daftar voucher yang sudah dibeli ===== */
+function renderPurchasedList(){
+    var list=purchased.slice().reverse();
+    if(curSpd!=='all'){
+        list=list.filter(function(p){return p.voucher.spd===parseInt(curSpd)});
+    }
+    var el=document.getElementById('vList');
+    if(!list.length){
+        el.innerHTML='<div class="empty-state"><i class="fas fa-shopping-bag"></i><p>Belum ada voucher yang dibeli</p></div>';
+        return;
+    }
+    var html='<div class="section-label"><i class="fas fa-check-circle"></i> Voucher Sudah Dibeli ('+list.length+')</div>';
+    list.forEach(function(p,i){html+=renderPurchasedCard(p,i)});
+    el.innerHTML=html;
+    list.forEach(function(p,i){
+        setTimeout(function(){drawBarcode('pbc-'+i,p.code)},50);
+    });
+}
+
+function renderPurchasedCard(p,i){
+    var v=p.voucher;
+    var isGm=v.cat==='gam';
+    var iconCls=isGm?'gam':'reg';
+    var iconFa=isGm?'gamepad':'ticket';
+    var typeName=v.physical?'Voucher Fisik':(isGm?'Gaming':'Reguler');
+    var dateStr=p.date.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    var durLabel=v.physical&&v.active?'Aktif '+v.active:getDurLabel(v);
+
+    return '<div class="vfis purchased-card" style="animation:fi .35s '+(i*0.06)+'s both">'+
+        companyHeaderHTML('Dibeli','bought')+
+        '<div class="vfis-top">'+
+            '<div class="vfis-icon '+iconCls+'"><i class="fas fa-'+iconFa+'"></i></div>'+
+            '<div class="vfis-info">'+
+                '<div class="vfis-name">'+v.spd+' Mbps <span class="tag bought-tag"><i class="fas fa-check" style="font-size:8px;margin-right:2px"></i> Aktif</span></div>'+
+                '<div class="vfis-feats">'+
+                    '<span><i class="fas fa-gauge-high"></i> '+v.spd+' Mbps</span>'+
+                    '<span><i class="fas fa-infinity"></i> Unlimited</span>'+
+                    '<span><i class="fas fa-calendar"></i> '+durLabel+'</span>'+
+                    (isGm?'<span><i class="fas fa-crosshairs"></i> Low Ping</span>':'')+
+                '</div>'+
+            '</div>'+
+            '<div class="vfis-price">'+fR(v.price)+'<span class="dur">'+typeName+'</span></div>'+
+        '</div>'+
+        '<hr class="vfis-tear">'+
+        '<div class="vfis-bot">'+
+            '<div class="vfis-code-area">'+
+                '<div class="vfis-code-lbl">Kode Aktifasi</div>'+
+                '<div class="vfis-code">'+p.code+'</div>'+
+                '<div class="vfis-meta">'+
+                    '<span><i class="fas fa-clock"></i> '+dateStr+'</span>'+
+                    '<span><i class="fas fa-wallet"></i> '+p.paymentMethod+(p.paymentNumber&&p.paymentNumber!=='-'?' ('+p.paymentNumber+')':'')+'</span>'+
+                '</div>'+
+            '</div>'+
+            '<div class="vfis-barcode"><canvas id="pbc-'+i+'" width="180" height="46"></canvas></div>'+
+            '<button class="vfis-copy" onclick="event.stopPropagation();cpText(\''+p.code+'\')" title="Salin kode"><i class="fas fa-copy"></i></button>'+
+        '</div>'+
+    '</div>';
+}
+/* ===== AKHIR TAMBAHAN ===== */
+
+function renderList(){
+    /* ===== TAMBAHAN: Jika tab Dibeli, render list pembelian ===== */
+    if(curCat==='purchased'){
+        renderPurchasedList();
+        return;
+    }
+    /* ===== AKHIR TAMBAHAN ===== */
+
+    var list=getFiltered(),el=document.getElementById('vList');
+    if(!list.length){el.innerHTML='<div class="empty-state"><i class="fas fa-search"></i><p>Tidak ada paket untuk filter ini</p></div>';return;}
+    var physical=list.filter(function(v){return v.physical});
+    var normal=list.filter(function(v){return !v.physical});
+    var html='',idx=0;
+    if(physical.length){
+        html+='<div class="section-label"><i class="fas fa-ticket"></i> Voucher Fisik</div>';
+        physical.forEach(function(v){html+=renderPhysical(v,idx++)});
+    }
+    if(normal.length){
+        html+='<div class="section-label" style="margin-top:20px"><i class="fas fa-list"></i> Paket Langganan</div>';
+        normal.forEach(function(v){html+=renderNormal(v,idx++)});
+    }
+    el.innerHTML=html;
+    /* ===== TAMBAHAN: Hanya gambar barcode untuk voucher yang sudah dibeli ===== */
+    physical.forEach(function(v){
+        if(isVoucherPurchased(v.id)){
+            setTimeout(function(){drawBarcode('bc-'+v.id,getPurchasedCode(v.id))},50);
+        }
+    });
+    /* ===== AKHIR TAMBAHAN ===== */
+}
+
+function filterCat(cat,btn){
+    curCat=cat;
+    document.querySelectorAll('#vTabs .vtab').forEach(function(t){t.classList.remove('act')});
+    btn.classList.add('act');
+    selVc=null;
+    document.getElementById('ppanel').classList.remove('show');
+    renderList();
+}
+function filterSpd(spd,btn){curSpd=spd;document.querySelectorAll('#speedFilter .filter-chip').forEach(function(c){c.classList.remove('act')});btn.classList.add('act');selVc=null;document.getElementById('ppanel').classList.remove('show');renderList();}
+
+function selectVc(id){
+    selVc=VOUCHERS.find(function(v){return v.id===id});if(!selVc)return;
+    document.querySelectorAll('.vc,.vfis').forEach(function(e){e.classList.remove('sel')});
+    var card=document.querySelector('[data-vid="'+id+'"]');if(card)card.classList.add('sel');
+    var isGm=selVc.cat==='gam';
+    var label=selVc.physical?'Voucher Fisik':'IMP.Net '+(isGm?'Gaming ':'');
+    document.getElementById('ppName').textContent=label+selVc.spd+' Mbps — '+(selVc.active||getDurLabel(selVc));
+    document.getElementById('ppDesc').textContent=selVc.physical?'Aktif '+selVc.active+', unlimited quota':(isGm?'Low latency, unlimited quota':'Fiber optik, unlimited quota');
+    var oldEl=document.getElementById('ppOld');
+    if(selVc.discount){oldEl.textContent=fR(Math.round(selVc.price/(1-selVc.discount/100)));oldEl.style.display='block';}else{oldEl.style.display='none';}
+    document.getElementById('ppPrice').textContent=fR(selVc.price);
+    document.getElementById('ppanel').classList.add('show');
+}
+
+function deselectVc(){selVc=null;document.querySelectorAll('.vc,.vfis').forEach(function(e){e.classList.remove('sel')});document.getElementById('ppanel').classList.remove('show')}
+
+function showBuyModal(){
+    if(!selVc)return;
+    var isGm=selVc.cat==='gam',isPhy=selVc.physical;
+    var oldPrice=selVc.discount?fR(Math.round(selVc.price/(1-selVc.discount/100))):null;
+    var durLabel=isPhy?'Aktif '+selVc.active:getDurLabel(selVc);
+    selPay=null;
+    payNumVal='';
+    var iconCls=isPhy?'reg':(isGm?'gam':'reg');
+    var iconFa=isPhy?'ticket':(isGm?'gamepad':'wifi');
+    var typeName=isPhy?'Voucher Fisik':(isGm?'Gaming':'Reguler');
+    var html=
+        '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">'+
+            '<div class="vc-icon '+iconCls+'" style="width:52px;height:52px;font-size:20px"><i class="fas fa-'+iconFa+'"></i></div>'+
+            '<div>'+
+                '<div style="font-weight:700;font-size:15px">'+COMPANY.name+' '+typeName+' '+selVc.spd+' Mbps</div>'+
+                '<div style="font-size:12px;color:var(--muted)">'+durLabel+' &middot; Unlimited'+(isGm?' &middot; Low Ping':'')+'</div>'+
+            '</div>'+
+        '</div>'+
+        '<div style="background:var(--bg);border-radius:12px;padding:16px">'+
+            '<div style="display:flex;justify-content:space-between;margin-bottom:8px">'+
+                '<span style="color:var(--muted);font-size:13px">Harga</span>'+
+                (oldPrice?'<span style="font-size:13px;color:var(--muted);text-decoration:line-through">'+oldPrice+'</span>':'<span style="font-size:13px;font-weight:600">'+fR(selVc.price)+'</span>')+
+            '</div>'+
+            (selVc.discount?'<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--accent);font-size:13px;font-weight:600">Diskon '+selVc.discount+'%</span><span style="color:var(--accent);font-size:13px;font-weight:700">- '+fR(Math.round(selVc.price/(1-selVc.discount/100))-selVc.price)+'</span></div>':'')+
+            '<div style="border-top:1px dashed var(--border);margin:10px 0"></div>'+
+            '<div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:15px">Total Bayar</span><span style="font-family:Space Grotesk;font-weight:800;font-size:20px;color:var(--accent)">'+fR(selVc.price)+'</span></div>'+
+        '</div>'+
+        '<div style="margin-top:20px">'+
+            '<label style="display:block;font-size:13px;font-weight:600;margin-bottom:10px">Metode Pembayaran</label>'+
+            '<div style="display:flex;flex-direction:column;gap:8px" id="payList">'+
+                PAYMENTS.map(function(p){return '<div class="pm-opt" data-pay="'+p.id+'" onclick="selectPay(\''+p.id+'\')"><div class="pm-icon" style="background:'+p.bg+';color:'+p.color+'"><i class="'+p.icon+'"></i></div><span class="pm-name">'+p.name+'</span></div>'}).join('')+
+            '</div>'+
+            '<div class="pay-num-wrap" id="payNumWrap">'+
+                '<div class="pay-num-label"><i class="fas fa-hashtag"></i> <span id="payNumLabel">Nomor</span></div>'+
+                '<input class="pay-num-input" type="text" id="payNumInput" inputmode="numeric" autocomplete="off" placeholder="">'+
+                '<div class="pay-num-hint" id="payNumHint"></div>'+
+                '<div class="pay-num-summary" id="payNumSummary" style="display:none">'+
+                    '<i class="fas fa-circle-check"></i>'+
+                    '<span>Pembayaran via <strong id="payNumSumName">-</strong> ke <strong id="payNumSumVal">-</strong></span>'+
+                '</div>'+
+            '</div>'+
+        '</div>';
+    document.getElementById('buyBody').innerHTML=html;
+    document.getElementById('buyFoot').innerHTML='<button class="btn btn-s" onclick="cBuy()">Batal</button><button class="btn btn-p" id="payBtn" onclick="onPayClick()" disabled><i class="fas fa-lock"></i> Bayar '+fR(selVc.price)+'</button>';
+    document.getElementById('buyMo').classList.add('show');
+    var numInput=document.getElementById('payNumInput');
+    numInput.addEventListener('input',onPayNumInput);
+    numInput.addEventListener('focus',function(){this.select()});
+}
+
+function onPayNumInput(){
+    var inp=document.getElementById('payNumInput');
+    var hint=document.getElementById('payNumHint');
+    var summary=document.getElementById('payNumSummary');
+    var payBtn=document.getElementById('payBtn');
+    this.value=this.value.replace(/[^0-9]/g,'');
+    var val=this.value;
+    payNumVal=val;
+    var pmCfg=PAYMENTS.find(function(p){return p.id===selPay});
+    if(!pmCfg){payBtn.disabled=true;return;}
+    var len=val.length;
+    inp.classList.remove('err','valid');
+    hint.classList.remove('err-text');
+    hint.textContent='';
+    summary.style.display='none';
+    if(len===0){payBtn.disabled=true;return;}
+    if(len<pmCfg.minLen){
+        hint.textContent='Minimal '+pmCfg.minLen+' digit ('+(pmCfg.minLen-len)+' lagi)';
+        hint.classList.add('err-text');
+        inp.classList.add('err');
+        payBtn.disabled=true;
+    }else if(len>pmCfg.maxLen){
+        this.value=val.slice(0,pmCfg.maxLen);
+        payNumVal=this.value;
+        hint.textContent='Maksimal '+pmCfg.maxLen+' digit';
+        hint.classList.add('err-text');
+        inp.classList.add('err');
+        payBtn.disabled=true;
+    }else{
+        inp.classList.add('valid');
+        hint.textContent='Nomor valid ('+len+' digit)';
+        summary.style.display='flex';
+        document.getElementById('payNumSumName').textContent=pmCfg.name;
+        document.getElementById('payNumSumVal').textContent=formatPhoneDisplay(payNumVal);
+        payBtn.disabled=false;
+    }
+}
+
+function formatPhoneDisplay(num){
+    if(!num)return'-';
+    if(num.length<=4)return num;
+    if(num.length<=8)return num.slice(0,4)+'-'+num.slice(4);
+    return num.slice(0,4)+'-'+num.slice(4,8)+'-'+num.slice(8);
+}
+
+function selectPay(id){
+    selPay=id;
+    payNumVal='';
+    document.querySelectorAll('.pm-opt').forEach(function(el){el.classList.remove('pm-sel')});
+    var el=document.querySelector('.pm-opt[data-pay="'+id+'"]');if(el)el.classList.add('pm-sel');
+    var pmCfg=PAYMENTS.find(function(p){return p.id===id});
+    var wrap=document.getElementById('payNumWrap');
+    var lbl=document.getElementById('payNumLabel');
+    var inp=document.getElementById('payNumInput');
+    var hint=document.getElementById('payNumHint');
+    var summary=document.getElementById('payNumSummary');
+    var payBtn=document.getElementById('payBtn');
+    if(pmCfg){
+        lbl.textContent=pmCfg.inputLabel;
+        inp.placeholder=pmCfg.placeholder;
+        inp.value='';
+        inp.classList.remove('err','valid');
+        hint.textContent='';
+        hint.classList.remove('err-text');
+        summary.style.display='none';
+        wrap.classList.add('show');
+        payBtn.disabled=true;
+        setTimeout(function(){inp.focus()},350);
+    }else{
+        wrap.classList.remove('show');
+        payBtn.disabled=false;
+    }
+}
+
+function onPayClick(){
+    if(!selPay){toast('warning','Pilih metode pembayaran terlebih dahulu');return;}
+    var pmCfg=PAYMENTS.find(function(p){return p.id===selPay});
+    if(pmCfg){
+        var numInp=document.getElementById('payNumInput');
+        if(!payNumVal||payNumVal.length<pmCfg.minLen){
+            numInp.classList.add('err');
+            numInp.focus();
+            document.getElementById('payNumHint').textContent='Masukkan nomor '+pmCfg.name+' yang valid (min. '+pmCfg.minLen+' digit)';
+            document.getElementById('payNumHint').classList.add('err-text');
+            toast('warning','Masukkan nomor '+pmCfg.name+' terlebih dahulu');
+            return;
+        }
+    }
+    cBuy();
+    showPinModal();
+}
+
+function cBuy(){document.getElementById('buyMo').classList.remove('show')}
+
+function showPinModal(){
+    document.getElementById('pinMo').classList.add('show');
+    var inputs=document.querySelectorAll('[data-pi]');
+    inputs.forEach(function(inp,i){
+        inp.value='';inp.classList.remove('filled','err');
+        inp.oninput=function(){this.value=this.value.replace(/[^0-9]/g,'');if(this.value.length===1){this.classList.add('filled');if(i<5)inputs[i+1].focus();}document.getElementById('pinErr').style.display='none';chkPinFull();};
+        inp.onkeydown=function(e){if(e.key==='Backspace'&&this.value===''&&i>0){inputs[i-1].focus();inputs[i-1].value='';inputs[i-1].classList.remove('filled');}};
+        inp.onpaste=function(e){e.preventDefault();var txt=(e.clipboardData||window.clipboardData).getData('text').replace(/[^0-9]/g,'').slice(0,6);for(var j=0;j<6;j++){inputs[j].value=txt[j]||'';if(txt[j])inputs[j].classList.add('filled');else inputs[j].classList.remove('filled');}if(txt.length>=5)inputs[5].focus();chkPinFull();};
+    });
+    setTimeout(function(){inputs[0].focus()},100);
+}
+function cPin(){document.getElementById('pinMo').classList.remove('show')}
+function chkPinFull(){var code=getPinVal();if(code.length===6){if(code!==PIN){document.getElementById('pinErr').textContent='PIN salah. Coba lagi.';document.getElementById('pinErr').style.display='block';document.querySelectorAll('[data-pi]').forEach(function(i){i.classList.add('err')});setTimeout(function(){document.querySelectorAll('[data-pi]').forEach(function(i){i.classList.remove('err')});clearPins();},600);}else{processPurchase();}}}
+function getPinVal(){return Array.from(document.querySelectorAll('[data-pi]')).map(function(i){return i.value}).join('')}
+function clearPins(){var inputs=document.querySelectorAll('[data-pi]');inputs.forEach(function(i){i.value='';i.classList.remove('filled','err')});if(inputs[0])inputs[0].focus();}
+
+function processPurchase(){
+    /* Simpan data sebelum deselect (karena deselectVc menghapus selVc) */
+    var boughtVc=selVc;
+    var boughtPay=selPay;
+    var boughtNum=payNumVal;
+
+    cPin();deselectVc();
+
+    var newCode='IMP-'+Math.random().toString(36).substring(2,6).toUpperCase()+'-'+Math.random().toString(36).substring(2,6).toUpperCase();
+    var pmCfg=PAYMENTS.find(function(p){return p.id===boughtPay});
+
+    /* ===== TAMBAHAN: Simpan ke daftar pembelian ===== */
+    purchased.push({
+        voucher:{id:boughtVc.id,cat:boughtVc.cat,spd:boughtVc.spd,dur:boughtVc.dur,durUnit:boughtVc.durUnit,active:boughtVc.active,price:boughtVc.price,discount:boughtVc.discount,physical:boughtVc.physical},
+        code:newCode,
+        date:new Date(),
+        paymentMethod:pmCfg?pmCfg.name:'-',
+        paymentNumber:boughtNum?formatPhoneDisplay(boughtNum):'-'
+    });
+    updatePurchasedBadge();
+    /* ===== AKHIR TAMBAHAN ===== */
+
+    var label=boughtVc.physical?'Voucher Fisik '+(boughtVc.cat==='gam'?'Gaming ':''):'IMP.Net '+(boughtVc.cat==='gam'?'Gaming ':'');
+    var payInfo=pmCfg?' via '+pmCfg.name+(boughtNum?' ('+formatPhoneDisplay(boughtNum)+')':''):'';
+    document.getElementById('succSub').textContent=label+boughtVc.spd+' Mbps '+(boughtVc.active||getDurLabel(boughtVc))+' telah aktif'+payInfo;
+    document.getElementById('succCode').textContent=newCode;
+    document.getElementById('succOv').classList.add('show');toast('success','Pembelian berhasil');
+}
+
+function cpText(t){navigator.clipboard.writeText(t).then(function(){toast('success','Kode disalin: '+t)}).catch(function(){toast('info',t)})}
+function cpCode(){cpText(document.getElementById('succCode').textContent)}
+
+function backToVouchers(){
+    document.getElementById('succOv').classList.remove('show');
+    selVc=null;
+    /* ===== TAMBAHAN: Otomatis pindah ke tab Dibeli ===== */
+    curCat='purchased';
+    document.querySelectorAll('#vTabs .vtab').forEach(function(t){t.classList.remove('act')});
+    document.getElementById('tabPurchased').classList.add('act');
+    /* ===== AKHIR TAMBAHAN ===== */
+    renderList();
+}
+function backToDashboard(){window.location.href='uji.html';}
+function goBack(){window.history.length>1?window.history.back():window.location.href='uji.html';}
+
+function toast(type,msg){
+    var c=document.getElementById('tw');
+    var cls={success:{bg:'#d1fae5',color:'#059669',icon:'fa-check'},error:{bg:'#fee2e2',color:'#ef4444',icon:'fa-xmark'},info:{bg:'#e0f2fe',color:'#0284c7',icon:'fa-info'},warning:{bg:'#fef3c7',color:'#d97706',icon:'fa-triangle-exclamation'}};
+    var cl=cls[type]||cls.info;
+    var el=document.createElement('div');el.className='toast';
+    el.innerHTML='<div class="toast-i" style="background:'+cl.bg+';color:'+cl.color+'"><i class="fas '+cl.icon+'"></i></div><span>'+msg+'</span>';
+    c.appendChild(el);setTimeout(function(){el.classList.add('out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},300)},3500);
+}
+
+renderList();
+updatePurchasedBadge();
+</script>
+</body>
+</html>
